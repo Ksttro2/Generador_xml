@@ -3,7 +3,7 @@ import re
 import ipaddress
 from pathlib import Path
 from datetime import datetime
-from typing import List, Optional, Dict
+from typing import List, Optional, Dict, Tuple
 
 import pandas as pd
 import tkinter as tk
@@ -12,6 +12,8 @@ import xml.etree.ElementTree as ET
 
 # ===================== Configuración =====================
 SHEET_NAME = "Interface"
+IPROUTING_SHEET = "IpRouting"
+IPRT_INDEX_DEFAULT = 2  # Cambia aquí si tu ruta está en otro IPRT-<n>
 
 # --- NAMESPACE RAML ---
 RAML_NS = "raml21.xsd"
@@ -27,7 +29,14 @@ DEFAULT_LOCATIONS = [
     Path(__file__).parent / "data.xlsx",
 ]
 
-# Alias de columnas -> nombre canónico
+# Último Excel cargado (para leer IpRouting del mismo archivo)
+LAST_EXCEL_PATH: Optional[Path] = None
+
+# Buffers crudos para IpRouting (para leer por letras de columna)
+IPRT_RAW_DF: Optional[pd.DataFrame] = None
+IPRT_HEADER_ROW: Optional[int] = None
+
+# Alias de columnas -> nombre canónico (Interface)
 COLUMN_ALIASES = {
     # Ids y nombre
     "macro enb id": "lnBtsId",
@@ -36,6 +45,7 @@ COLUMN_ALIASES = {
     "enbname": "eNBName",
     "enb name": "eNBName",
     "enb": "eNBName",
+    "cellname": "cellName",
 
     # IP/VLAN
     "ip address of the network interface": "localIpAddr",
@@ -51,10 +61,31 @@ COLUMN_ALIASES = {
     "ip address of the top master": "topMasterIp",
     "timing over packet message rate": "topRate",
 
-    # Ubicación (para que la lea del Excel con distintos encabezados)
+    # Ubicación
     "modulelocation": "moduleLocation",
     "module location": "moduleLocation",
     "location": "moduleLocation",
+}
+
+# Alias (IpRouting) – genéricos para compatibilidad
+COLUMN_ALIASES_IPRT = {
+    "destination ip address of static route": "iprtDest",
+    "destination ip address of static route (rc)": "dest_rc",
+    "destination ip address of static route (trafica)": "dest_trafica",
+    "destination ip address of static route (arieso)": "dest_arieso",
+    "destination ip address": "iprtDest",
+    "dest ip": "iprtDest",
+    "destip": "iprtDest",
+    "gateway": "iprtGateway",
+    "gw": "iprtGateway",
+
+    # Para cruzar por si viene
+    "macro enb id": "lnBtsId",
+    "lnbtsid": "lnBtsId",
+    "ln bts id": "lnBtsId",
+    "enbname": "eNBName",
+    "enb name": "eNBName",
+    "enb": "eNBName",
 }
 
 REQUIRED_COLUMNS = ["lnBtsId", "eNBName"]
@@ -63,9 +94,9 @@ REQUIRED_COLUMNS = ["lnBtsId", "eNBName"]
 def _canon_base(s: str) -> str:
     return " ".join(str(s).strip().lower().split())
 
-def canonize(col: str) -> str:
+def canonize_with_aliases(col: str, aliases: Dict[str, str]) -> str:
     base = _canon_base(col)
-    return COLUMN_ALIASES.get(base, None) or str(col).strip()
+    return aliases.get(base, None) or str(col).strip()
 
 def _dedupe_columns(cols: List[str]) -> List[str]:
     seen = {}
@@ -84,12 +115,7 @@ def _row_has_keys(cells: List[str], keys: List[str], min_hits: int = 2) -> bool:
     hits = sum(1 for k in keys if _canon_base(k) in norm_cells)
     return hits >= min_hits
 
-def _autodetect_header_row(df_raw: pd.DataFrame) -> int:
-    candidate_keys = [
-        "macro eNB id", "lnBtsId", "eNBName", "enbName",
-        "IP address of the network interface",
-        "Network mask of the IP address", "VLAN identifier"
-    ]
+def _autodetect_header_row_generic(df_raw: pd.DataFrame, candidate_keys: List[str]) -> int:
     max_scan = min(30, len(df_raw))
     for i in range(max_scan):
         row_vals = df_raw.iloc[i].tolist()
@@ -98,39 +124,65 @@ def _autodetect_header_row(df_raw: pd.DataFrame) -> int:
             return i
     return 0
 
-def _finalize_after_header(df_raw: pd.DataFrame, header_row: int) -> pd.DataFrame:
+def _finalize_after_header_generic(df_raw: pd.DataFrame, header_row: int, aliases: Dict[str, str]) -> pd.DataFrame:
     header_vals = df_raw.iloc[header_row].tolist()
     df = df_raw.iloc[header_row + 1:].copy()
     df.columns = header_vals
     df = df.dropna(axis=1, how="all").dropna(axis=0, how="all")
-    mapped = [canonize(c) for c in df.columns]
+    mapped = [canonize_with_aliases(c, aliases) for c in df.columns]
     df.columns = _dedupe_columns(mapped)
     return df
 
 def read_interface_sheet(path: Path) -> pd.DataFrame:
     raw = pd.read_excel(path, sheet_name=SHEET_NAME, header=None, dtype=object)
-    hrow = _autodetect_header_row(raw)
-    df = _finalize_after_header(raw, hrow)
+    cand = [
+        "macro eNB id", "lnBtsId", "eNBName", "enbName",
+        "IP address of the network interface",
+        "Network mask of the IP address", "VLAN identifier"
+    ]
+    hrow = _autodetect_header_row_generic(raw, cand)
+    df = _finalize_after_header_generic(raw, hrow, COLUMN_ALIASES)
     return df
 
+# Lee IpRouting crudo + procesado, y guarda header_row en globales
+def read_iprouting_both(path: Path) -> Tuple[Optional[pd.DataFrame], Optional[pd.DataFrame], Optional[int]]:
+    try:
+        raw = pd.read_excel(path, sheet_name=IPROUTING_SHEET, header=None, dtype=object)
+    except Exception:
+        return (None, None, None)
+    cand = list(COLUMN_ALIASES_IPRT.keys()) + ["iprtDest", "iprtGateway", "lnBtsId", "eNBName"]
+    hrow = _autodetect_header_row_generic(raw, cand)
+    df = _finalize_after_header_generic(raw, hrow, COLUMN_ALIASES_IPRT)
+    return (df, raw, hrow)
+
 def load_dataframe(initial_path: Optional[Path] = None) -> pd.DataFrame:
-    # Ruta explícita (opcional)
+    global LAST_EXCEL_PATH
     if initial_path:
         p = Path(initial_path).expanduser()
         if p.exists():
+            LAST_EXCEL_PATH = p
             return read_interface_sheet(p)
-    # Ubicaciones por defecto
     for p in DEFAULT_LOCATIONS:
         if p.exists():
+            LAST_EXCEL_PATH = p
             return read_interface_sheet(p)
-    # Diálogo si no se encontró
     sel = filedialog.askopenfilename(
         title=f"Selecciona el Excel (hoja '{SHEET_NAME}')",
         filetypes=[("Excel", "*.xlsx *.xlsm *.xls"), ("Todos", "*.*")]
     )
     if not sel:
         raise FileNotFoundError("No se seleccionó archivo de Excel.")
-    return read_interface_sheet(Path(sel))
+    LAST_EXCEL_PATH = Path(sel)
+    return read_interface_sheet(LAST_EXCEL_PATH)
+
+def load_iprouting_from_last() -> Optional[pd.DataFrame]:
+    global IPRT_RAW_DF, IPRT_HEADER_ROW
+    if LAST_EXCEL_PATH and LAST_EXCEL_PATH.exists():
+        df, raw, hrow = read_iprouting_both(LAST_EXCEL_PATH)
+        IPRT_RAW_DF = raw
+        IPRT_HEADER_ROW = hrow
+        return df
+    return None
 
 def validate_required(row: pd.Series) -> List[str]:
     missing: List[str] = []
@@ -169,6 +221,11 @@ def pick_host_ip(ip_str: str, prefix_len: int) -> str:
     except Exception:
         return ip_str
 
+def normalize_ip(val: str) -> str:
+    s = str(val or "").strip().replace(",", ".")
+    m = re.search(r"\b\d{1,3}(?:\.\d{1,3}){3}\b", s)
+    return m.group(0) if m else s
+
 def get_block(df_row: pd.Series, idx: int) -> Dict[str, str]:
     suf = "" if idx == 1 else f"_{idx}"
     ip = sval(df_row, f"localIpAddr{suf}")
@@ -179,32 +236,24 @@ def get_block(df_row: pd.Series, idx: int) -> Dict[str, str]:
     return {"ip": host_ip, "prefix": str(plen) if plen else "", "vlan": vlan}
 
 # ===================== XML helpers (RAML Nokia) =====================
-def xp(elem, query):  # xpath con namespace por defecto
+def xp(elem, query):
     return elem.findall(query, NS)
 
 def first(elem, query):
     lst = xp(elem, query)
     return lst[0] if lst else None
 
-def get_template_mrbts_id(root) -> str:
-    mr = first(root, ".//r:managedObject[@class='com.nokia.srbts:MRBTS']")
-    if mr is None:
-        return ""
-    dist = mr.get("distName", "")
-    m = re.search(r"MRBTS-(\d+)", dist)
-    return m.group(1) if m else ""
-
-def replace_all_distNames(cmData, old_id: str, new_id: str):
-    if not old_id or not new_id or old_id == new_id:
+def replace_all_mrbts_ids_anywhere(cmData, new_id: str):
+    if not new_id or not re.fullmatch(r"\d+", str(new_id).strip()):
         return
-    for mo in xp(cmData, ".//r:managedObject"):
-        dn = mo.get("distName", "")
-        if f"MRBTS-{old_id}" in dn:
-            mo.set("distName", dn.replace(f"MRBTS-{old_id}", f"MRBTS-{new_id}"))
-        # Reemplaza también DNs dentro de <p> que contienen MRBTS-<id>
-        for p in xp(mo, "./r:p"):
-            if p.text and f"MRBTS-{old_id}" in p.text:
-                p.text = p.text.replace(f"MRBTS-{old_id}", f"MRBTS-{new_id}")
+    pat = re.compile(r"MRBTS-\d+")
+    repl = f"MRBTS-{str(new_id).strip()}"
+    for elem in cmData.iter():
+        for k, v in list(elem.attrib.items()):
+            if isinstance(v, str) and pat.search(v):
+                elem.set(k, pat.sub(repl, v))
+        if isinstance(elem.text, str) and pat.search(elem.text):
+            elem.text = pat.sub(repl, elem.text)
 
 def set_bts_name(cmData, new_name: str):
     mr = first(cmData, ".//r:managedObject[@class='com.nokia.srbts:MRBTS']")
@@ -214,9 +263,7 @@ def set_bts_name(cmData, new_name: str):
     if p is None:
         p = ET.SubElement(mr, f"{{{NS['r']}}}p", {"name":"btsName"})
     p.text = new_name
-    
 
-# ---- Evitan 'invalid predicate' (no usan contains() en XPath) ----
 def _iter_managed_objects(cmData):
     return xp(cmData, ".//r:managedObject")
 
@@ -228,9 +275,7 @@ def _find_mo_by_class_and_dist_contains(cmData, class_name: str, contains_str: s
 
 def set_vlan(cmData, idx: int, vlan_id: str):
     mo = _find_mo_by_class_and_dist_contains(
-        cmData,
-        "com.nokia.srbts.tnl:VLANIF",
-        f"/VLANIF-{idx}"
+        cmData, "com.nokia.srbts.tnl:VLANIF", f"/VLANIF-{idx}"
     )
     if mo is None:
         return
@@ -245,23 +290,18 @@ def set_vlan(cmData, idx: int, vlan_id: str):
 
 def set_ip_block(cmData, idx: int, ip: str, prefix: str):
     ipmo = _find_mo_by_class_and_dist_contains(
-        cmData,
-        "com.nokia.srbts.tnl:IPADDRESSV4",
-        f"/IPIF-{idx}/IPADDRESSV4-1"
+        cmData, "com.nokia.srbts.tnl:IPADDRESSV4", f"/IPIF-{idx}/IPADDRESSV4-1"
     )
     if ipmo is None:
         return
-
     palloc = first(ipmo, "./r:p[@name='ipAddressAllocationMethod']")
     if palloc is None:
         ET.SubElement(ipmo, f"{{{NS['r']}}}p", {"name":"ipAddressAllocationMethod"}).text = "MANUAL"
-
     lp = first(ipmo, "./r:p[@name='localIpAddr']")
     if lp is None:
         lp = ET.SubElement(ipmo, f"{{{NS['r']}}}p", {"name":"localIpAddr"})
     if ip:
         lp.text = ip
-
     lpl = first(ipmo, "./r:p[@name='localIpPrefixLength']")
     if lpl is None:
         lpl = ET.SubElement(ipmo, f"{{{NS['r']}}}p", {"name":"localIpPrefixLength"})
@@ -275,7 +315,6 @@ def set_ntp_servers(cmData, primary: str, secondary: str):
     lst = first(ntp, "./r:list[@name='ntpServerIpAddrOrFqdnList']")
     if lst is None:
         lst = ET.SubElement(ntp, f"{{{NS['r']}}}list", {"name":"ntpServerIpAddrOrFqdnList"})
-    # limpiar hijos <p> actuales y reponer
     for child in list(lst):
         lst.remove(child)
     if primary:
@@ -287,7 +326,6 @@ def set_top_master_and_rate(cmData, master_ip: str, rate_val: str):
     topf = first(cmData, ".//r:managedObject[@class='com.nokia.srbts.mnl:TOPF']")
     if topf is None:
         return
-    # master list
     lst = first(topf, "./r:list[@name='topMasterList']")
     if lst is not None:
         it = first(lst, "./r:item")
@@ -298,7 +336,6 @@ def set_top_master_and_rate(cmData, master_ip: str, rate_val: str):
             mp = ET.SubElement(it, f"{{{NS['r']}}}p", {"name":"masterIpAddr"})
         if master_ip:
             mp.text = master_ip
-    # rate
     rp = first(topf, "./r:p[@name='syncMessageRate']")
     if rp is None:
         rp = ET.SubElement(topf, f"{{{NS['r']}}}p", {"name":"syncMessageRate"})
@@ -317,32 +354,192 @@ def ensure_top_splane_points_to_ipif3(cmData):
         return
     p.text = re.sub(r"/IPIF-\d+/IPADDRESSV4-1$", "/IPIF-3/IPADDRESSV4-1", p.text or "", flags=re.I)
 
-# ======= Setter global para parámetros <p name="..."> (OPCIÓN 2) =======
 def set_param_global(cmData, p_name: str, value: str, create_if_missing: bool = True):
-    """
-    Actualiza TODAS las ocurrencias de <p name="p_name"> en cualquier managedObject.
-    Si no existe ninguna y create_if_missing=True, crea una bajo MRBTS (si existe), si no, en el primer managedObject.
-    """
-    if value is None:
+    if value is None or value == "":
         return
-
     changed = False
     for mo in xp(cmData, ".//r:managedObject"):
         p = first(mo, f"./r:p[@name='{p_name}']")
         if p is not None:
             p.text = value
             changed = True
-
     if changed or not create_if_missing:
         return
-
     target_mo = first(cmData, ".//r:managedObject[@class='com.nokia.srbts:MRBTS']") or first(cmData, ".//r:managedObject")
     if target_mo is not None:
         ET.SubElement(target_mo, f"{{{NS['r']}}}p", {"name": p_name}).text = value
 
+# ===================== IpRouting helpers (por letra de columna) =====================
+def excel_col_to_idx(col_letter: str) -> int:
+    col_letter = str(col_letter).strip().upper()
+    if not re.fullmatch(r"[A-Z]+", col_letter):
+        raise ValueError(f"Letra de columna inválida: {col_letter}")
+    idx = 0
+    for ch in col_letter:
+        idx = idx * 26 + (ord(ch) - ord('A') + 1)
+    return idx - 1  # 0-based
+
+def iprt_get_by_letter(raw_df: pd.DataFrame, abs_row_idx: int, col_letter: str) -> Optional[str]:
+    try:
+        j = excel_col_to_idx(col_letter)
+        v = raw_df.iat[abs_row_idx, j]
+        if pd.isna(v):
+            return None
+        return str(v).strip()
+    except Exception:
+        return None
+
+def iprt_match_row(df_iprt: Optional[pd.DataFrame], lnBtsId: str, eNBName: str) -> Tuple[Optional[pd.Series], Optional[int]]:
+    """Devuelve (fila_iprt_procesada, abs_row_idx_en_raw)"""
+    if df_iprt is None or df_iprt.empty or IPRT_RAW_DF is None or IPRT_HEADER_ROW is None:
+        return (None, None)
+    row_rel = None
+    if "lnBtsId" in df_iprt.columns and lnBtsId:
+        m = df_iprt["lnBtsId"].astype(str).str.strip() == str(lnBtsId).strip()
+        if m.any():
+            row_rel = df_iprt[m].iloc[0]
+    if row_rel is None and "eNBName" in df_iprt.columns and eNBName:
+        m = df_iprt["eNBName"].astype(str).str.strip() == str(eNBName).strip()
+        if m.any():
+            row_rel = df_iprt[m].iloc[0]
+    if row_rel is None:
+        row_rel = df_iprt.iloc[0]
+
+    rel_pos = row_rel.name
+    if isinstance(rel_pos, (int, float)):
+        rel_pos_int = int(rel_pos)
+    else:
+        rel_pos_int = df_iprt.index.get_loc(rel_pos)
+    abs_idx = IPRT_HEADER_ROW + 1 + rel_pos_int
+    return (row_rel, abs_idx)
+
+# ===================== Static Routes: construir y escribir en TODOS los IPRT =====================
+def get_col_flexible_from_row(row: Optional[pd.Series], keywords: List[str]) -> Optional[str]:
+    """Busca en los encabezados de la fila una columna que contenga alguno de los keywords."""
+    if row is None:
+        return None
+    for c in row.index:
+        c_norm = _canon_base(str(c))
+        if any(kw in c_norm for kw in keywords):
+            v = row.get(c)
+            if v is not None and not pd.isna(v):
+                return str(v).strip()
+    return None
+
+def build_static_items_from_sheets(
+    df_iprt: Optional[pd.DataFrame],
+    iprt_abs_row_idx: Optional[int],
+    interface_row: pd.Series
+) -> List[Dict[str, str]]:
+    """
+    Devuelve SIEMPRE los 5 ítems en el orden correcto:
+    RC (13), Tráfica (32), Arieso (28), ToP Master (32), Default (0).
+    Si falta el dato en Excel, se crea con dest vacío.
+    """
+    items: List[Dict[str, str]] = []
+
+    # Gateways por letra
+    gw_DA = gw_DM = gw_DQ = gw_H = None
+    if IPRT_RAW_DF is not None and iprt_abs_row_idx is not None:
+        gw_DA = iprt_get_by_letter(IPRT_RAW_DF, iprt_abs_row_idx, "DA")
+        gw_DM = iprt_get_by_letter(IPRT_RAW_DF, iprt_abs_row_idx, "DM")
+        gw_DQ = iprt_get_by_letter(IPRT_RAW_DF, iprt_abs_row_idx, "DQ")
+        gw_H  = iprt_get_by_letter(IPRT_RAW_DF, iprt_abs_row_idx, "H")
+
+    # Fila procesada (por encabezados)
+    iprt_row_rel, _ = iprt_match_row(df_iprt, sval(interface_row, "lnBtsId"), sval(interface_row, "eNBName"))
+
+    # Destinos
+    dest_rc      = get_col_flexible_from_row(iprt_row_rel, ["destination ip address of static route (rc)", "(rc)"])
+    dest_trafica = get_col_flexible_from_row(iprt_row_rel, ["destination ip address of static route (trafica)", "trafica"])
+    dest_arieso  = get_col_flexible_from_row(iprt_row_rel, ["destination ip address of static route (arieso)", "arieso"])
+    top_master_dest = sval(interface_row, "topMasterIp")
+
+    # Helper: agrega siempre el ítem (aunque no haya dest)
+    def push(prefix, dest, gw):
+        dest = normalize_ip(dest or "")
+        gw   = normalize_ip(gw or "")
+        if not dest:
+            dest = "0.0.0.0"
+        if not gw:
+            gw = "0.0.0.0"
+        items.append({"prefix": str(prefix), "dest": dest, "gw": gw, "pref": "1", "preSrc": "0.0.0.0"})
+
+    # Orden fijo
+    push(13, dest_rc,        gw_DA)  # RC
+    push(32, dest_trafica,   gw_DM)  # Tráfica
+    push(28, dest_arieso,    gw_DQ)  # Arieso
+    push(32, top_master_dest, gw_H)  # ToP Master
+    push(0, "0.0.0.0",       gw_H)   # Default
+
+    # Debug
+    print(f"[StaticRoutes] RC={dest_rc} gw_DA={gw_DA} | TRAF={dest_trafica} gw_DM={gw_DM} | ARI={dest_arieso} gw_DQ={gw_DQ} | TOP={top_master_dest} gw_H={gw_H}")
+
+    return items
+
+
+def write_static_routes_to_mo(mo_iprt: ET.Element, items: List[Dict[str, str]]):
+    """
+    Limpia y escribe <list name="staticRoutes"> en el MO IPRT dado.
+    """
+    lst = first(mo_iprt, "./r:list[@name='staticRoutes']")
+    if lst is None:
+        lst = ET.SubElement(mo_iprt, f"{{{NS['r']}}}list", {"name":"staticRoutes"})
+    else:
+        for child in list(lst):
+            lst.remove(child)
+
+    for it in items:
+        item = ET.SubElement(lst, f"{{{NS['r']}}}item")
+        ET.SubElement(item, f"{{{NS['r']}}}p", {"name": "destinationIpPrefixLength"}).text = it["prefix"]
+        ET.SubElement(item, f"{{{NS['r']}}}p", {"name": "destIpAddr"}).text = it["dest"]
+        ET.SubElement(item, f"{{{NS['r']}}}p", {"name": "gateway"}).text = it["gw"]
+        ET.SubElement(item, f"{{{NS['r']}}}p", {"name": "preference"}).text = it["pref"]
+        ET.SubElement(item, f"{{{NS['r']}}}p", {"name": "preSrcIpv4Addr"}).text = it["preSrc"]
+
+def rebuild_static_routes_from_sheets_for_all_iprt(
+    cmData: ET.Element,
+    df_iprt: Optional[pd.DataFrame],
+    iprt_abs_row_idx: Optional[int],
+    interface_row: pd.Series
+):
+    """
+    Genera los 5 ítems desde las hojas y los escribe en TODOS los managedObject IPRT del XML.
+    Así te aseguras de que no queden valores de la plantilla en ningún IPRT.
+    """
+    items = build_static_items_from_sheets(df_iprt, iprt_abs_row_idx, interface_row)
+    all_iprt = [m for m in _iter_managed_objects(cmData) if m.get("class") == "com.nokia.srbts.tnl:IPRT"]
+    for mo in all_iprt:
+        write_static_routes_to_mo(mo, items)
+
+# ===================== Búsqueda en IpRouting (compat UI) =====================
+def find_iprouting_values(df_iprt: Optional[pd.DataFrame], lnBtsId: str, eNBName: str) -> Tuple[Optional[str], Optional[str]]:
+    if df_iprt is None or df_iprt.empty:
+        return (None, None)
+    row = None
+    if "lnBtsId" in df_iprt.columns and lnBtsId:
+        m = df_iprt["lnBtsId"].astype(str).str.strip() == str(lnBtsId).strip()
+        if m.any():
+            row = df_iprt[m].iloc[0]
+    if row is None and "eNBName" in df_iprt.columns and eNBName:
+        m = df_iprt["eNBName"].astype(str).str.strip() == str(eNBName).strip()
+        if m.any():
+            row = df_iprt[m].iloc[0]
+    if row is None:
+        row = df_iprt.iloc[0]
+    dest = normalize_ip(sval(row, "iprtDest"))
+    gw = normalize_ip(sval(row, "iprtGateway"))
+    return (dest or None, gw or None)
+
 # ===================== Construcción desde plantilla fija =====================
-def build_xml_from_row_using_template(row: pd.Series) -> bytes:
-    # Validación mínima
+def build_xml_from_row_using_template(
+    row: pd.Series,
+    df_iprt: Optional[pd.DataFrame] = None,
+    iprt_dest: Optional[str] = None,
+    iprt_gateway: Optional[str] = None,
+    top_master_override: Optional[str] = None,
+    iprt_index: int = IPRT_INDEX_DEFAULT
+) -> bytes:
     missing = validate_required(row)
     if missing:
         raise RuntimeError("Faltan campos obligatorios: " + ", ".join(missing))
@@ -351,68 +548,97 @@ def build_xml_from_row_using_template(row: pd.Series) -> bytes:
 
     lnBtsId = sval(row, "lnBtsId")
     enbName = sval(row, "eNBName")
+    cellName_excel = sval(row, "cellName")
 
-    # Bloques de transporte (1..4)
     b1 = get_block(row, 1)
     b2 = get_block(row, 2)
     b3 = get_block(row, 3)
     b4 = get_block(row, 4)
 
-    # NTP / TOP
     ntp_primary   = sval(row, "ntpPrimary")
     ntp_secondary = sval(row, "ntpSecondary")
     top_master    = sval(row, "topMasterIp")
     rate_raw      = sval(row, "topRate") or "32"
 
-    # Cargar plantilla
     tree = ET.parse(str(TEMPLATE_PATH))
     root = tree.getroot()
     cmData = first(root, "./r:cmData")
     if cmData is None:
         raise RuntimeError("No se encontró <cmData> en la plantilla.")
 
-    # MRBTS old -> new
-    old_id = get_template_mrbts_id(cmData)
-    replace_all_distNames(cmData, old_id, lnBtsId)
+    # Reemplazo global de MRBTS-<n>
+    replace_all_mrbts_ids_anywhere(cmData, lnBtsId)
 
-    # Nombre del sitio
+    # Nombres y ubicación
     set_bts_name(cmData, enbName)
-
+    set_param_global(cmData, "enbName", enbName, True)
+    cellName_final = cellName_excel or (f"{enbName}_T1" if enbName else "")
+    if cellName_final:
+        set_param_global(cmData, "cellName", cellName_final, True)
 
     module_loc = sval(row, "moduleLocation")
     if module_loc:
         set_param_global(cmData, "moduleLocation", module_loc, create_if_missing=True)
     else:
-        # ⚠️ Forzar que moduleLocation = eNBName si no viene en Excel
         set_param_global(cmData, "moduleLocation", enbName, create_if_missing=True)
 
-    # VLANs (1..4)
+    # VLANs e IPs
     set_vlan(cmData, 1, b1["vlan"])
     set_vlan(cmData, 2, b2["vlan"])
     set_vlan(cmData, 3, b3["vlan"])
     set_vlan(cmData, 4, b4["vlan"])
 
-    # IP/prefix (1..4)
     set_ip_block(cmData, 1, b1["ip"], b1["prefix"])
     set_ip_block(cmData, 2, b2["ip"], b2["prefix"])
     set_ip_block(cmData, 3, b3["ip"], b3["prefix"])
     set_ip_block(cmData, 4, b4["ip"], b4["prefix"])
 
-    # TOP apunta a IPIF-3 (como en tu plantilla)
+    # TOP a IPIF-3
     ensure_top_splane_points_to_ipif3(cmData)
 
-    # NTP y TOP master/rate (si hay datos en Excel; si vienen vacíos, se mantienen los de la plantilla)
+    # NTP y TOPF
+    effective_master = normalize_ip(top_master_override) if top_master_override else top_master
     if ntp_primary or ntp_secondary:
         set_ntp_servers(cmData, ntp_primary or "", ntp_secondary or "")
-    if top_master or rate_raw:
-        set_top_master_and_rate(cmData, top_master or "", rate_raw)
+    if effective_master or rate_raw:
+        set_top_master_and_rate(cmData, normalize_ip(effective_master) if effective_master else "", rate_raw)
 
-    # Actualiza fecha en header (sin tocar nada más)
+    # ===== Reconstrucción de staticRoutes usando hojas (TODOS los IPRT) =====
+    _, iprt_abs_idx = iprt_match_row(
+        df_iprt=df_iprt,
+        lnBtsId=lnBtsId,
+        eNBName=enbName
+    )
+    rebuild_static_routes_from_sheets_for_all_iprt(
+        cmData=cmData,
+        df_iprt=df_iprt,
+        iprt_abs_row_idx=iprt_abs_idx,
+        interface_row=row
+    )
+
+    # ===== Compatibilidad: si pasan overrides, fuerza primer item del primer IPRT =====
+    if iprt_dest or iprt_gateway:
+        mo = _find_mo_by_class_and_dist_contains(cmData, "com.nokia.srbts.tnl:IPRT", f"/IPRT-{iprt_index}")
+        if mo is not None:
+            lst = first(mo, "./r:list[@name='staticRoutes']")
+            if lst is None:
+                lst = ET.SubElement(mo, f"{{{NS['r']}}}list", {"name":"staticRoutes"})
+            it = first(lst, "./r:item")
+            if it is None:
+                it = ET.SubElement(lst, f"{{{NS['r']}}}item")
+            if iprt_dest:
+                dp = first(it, "./r:p[@name='destIpAddr']") or ET.SubElement(it, f"{{{NS['r']}}}p", {"name":"destIpAddr"})
+                dp.text = normalize_ip(iprt_dest)
+            if iprt_gateway:
+                gp = first(it, "./r:p[@name='gateway']") or ET.SubElement(it, f"{{{NS['r']}}}p", {"name":"gateway"})
+                gp.text = normalize_ip(iprt_gateway)
+
+    # Fecha en header
     header_log = first(cmData, "./r:header/r:log")
     if header_log is not None:
         header_log.set("dateTime", datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ"))
 
-    # Serializar sin cambiar nada más
+    # Serializar
     bio = io.BytesIO()
     try:
         ET.indent(tree, space="  ", level=0)
@@ -427,18 +653,18 @@ class App(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("Clonador XML (Plantilla fija en ./doc)")
-        self.geometry("980x640")
+        self.geometry("1020x680")
 
         self.df: Optional[pd.DataFrame] = None
+        self.df_iprt: Optional[pd.DataFrame] = None
         self.filtered_names: List[str] = []
-        self.selected_name: Optional[str] = None
-
         self.selected_name: Optional[str] = None
 
         self._build_widgets()
 
         try:
             self.df = load_dataframe()
+            self.df_iprt = load_iprouting_from_last()
             self._refresh_hint()
             self._suggest_initial()
         except Exception as e:
@@ -463,7 +689,7 @@ class App(tk.Tk):
         ttk.Label(right, text="Detalle de la fila seleccionada").pack(anchor="w")
         self.tree = ttk.Treeview(right, columns=("col", "val"), show="headings", height=18)
         self.tree.heading("col", text="Columna"); self.tree.heading("val", text="Valor")
-        self.tree.column("col", width=320, anchor="w"); self.tree.column("val", width=520, anchor="w")
+        self.tree.column("col", width=340, anchor="w"); self.tree.column("val", width=560, anchor="w")
         self.tree.pack(fill=tk.BOTH, expand=True)
         yscroll = ttk.Scrollbar(right, orient="vertical", command=self.tree.yview)
         self.tree.configure(yscrollcommand=yscroll.set); yscroll.place(in_=self.tree, relx=1.0, rely=0, relheight=1.0, x=-1)
@@ -478,7 +704,8 @@ class App(tk.Tk):
         if self.df is None:
             self.hint_lbl.config(text=f"Sin Excel cargado | Plantilla: {TEMPLATE_PATH.name} [{tpl_ok}]"); return
         cols = ", ".join(self.df.columns.tolist()[:8])
-        self.hint_lbl.config(text=f"Filas: {len(self.df)} | Columnas: {len(self.df.columns)} (ej: {cols}...) | Plantilla: {TEMPLATE_PATH.name} [{tpl_ok}]")
+        iprt_info = "IpRouting: OK" if (self.df_iprt is not None and not self.df_iprt.empty) else "IpRouting: N/D"
+        self.hint_lbl.config(text=f"Filas: {len(self.df)} | Columnas: {len(self.df.columns)} (ej: {cols}...) | {iprt_info} | Plantilla: {TEMPLATE_PATH.name} [{tpl_ok}]")
 
     def _suggest_initial(self):
         if self.df is None or "eNBName" not in self.df.columns: return
@@ -493,6 +720,7 @@ class App(tk.Tk):
     def on_reload_excel(self):
         try:
             self.df = load_dataframe()
+            self.df_iprt = load_iprouting_from_last()
             self._refresh_hint(); self.entry.delete(0, tk.END)
             self._suggest_initial(); self.tree.delete(*self.tree.get_children())
             self.selected_name = None
@@ -536,8 +764,21 @@ class App(tk.Tk):
         if rows.empty:
             messagebox.showerror("Error", "No se encontró la fila seleccionada."); return
         row = rows.iloc[0]
+
+        lnBtsId = sval(row, "lnBtsId")
+        eNBName = sval(row, "eNBName")
+        dest_ip, gw_ip = find_iprouting_values(self.df_iprt, lnBtsId, eNBName)
+        top_master_override = dest_ip  # opcional: setear TOPF.masterIpAddr igual al "dest" genérico
+
         try:
-            xml_bytes = build_xml_from_row_using_template(row)
+            xml_bytes = build_xml_from_row_using_template(
+                row,
+                df_iprt=self.df_iprt,
+                iprt_dest=dest_ip,
+                iprt_gateway=gw_ip,
+                top_master_override=top_master_override,
+                iprt_index=IPRT_INDEX_DEFAULT
+            )
         except Exception as e:
             messagebox.showerror("Error al generar XML", str(e)); return
 

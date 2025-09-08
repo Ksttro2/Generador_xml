@@ -118,7 +118,7 @@ def _row_has_keys(cells: List[str], keys: List[str], min_hits: int = 2) -> bool:
 def _autodetect_header_row_generic(df_raw: pd.DataFrame, candidate_keys: List[str]) -> int:
     max_scan = min(30, len(df_raw))
     for i in range(max_scan):
-        row_vals = df_raw.iloc[i].tolist()
+        row_vals = df_raw.iloc(i if isinstance(df_raw.index, range) else i) if False else df_raw.iloc[i].tolist()
         cells = [str(x) for x in row_vals if (isinstance(x, str) or pd.notna(x))]
         if _row_has_keys(cells, candidate_keys, min_hits=2):
             return i
@@ -477,7 +477,6 @@ def build_static_items_from_sheets(
 
     return items
 
-
 def write_static_routes_to_mo(mo_iprt: ET.Element, items: List[Dict[str, str]]):
     """
     Limpia y escribe <list name="staticRoutes"> en el MO IPRT dado.
@@ -531,6 +530,69 @@ def find_iprouting_values(df_iprt: Optional[pd.DataFrame], lnBtsId: str, eNBName
     gw = normalize_ip(sval(row, "iprtGateway"))
     return (dest or None, gw or None)
 
+# ===================== Helpers para insertar LNCEL desde TXT =====================
+SECTOR_TO_LNCEL_INDEX = {
+    "L1": 1, "L2": 2, "L3": 3,
+    "T1": 1, "T2": 2, "T3": 3,
+}
+
+def _ensure_namespace_recursive(elem: ET.Element):
+    """Convierte etiquetas sin namespace al namespace RAML_NS."""
+    if not elem.tag.startswith("{"):
+        elem.tag = f"{{{NS['r']}}}{elem.tag}"
+    for child in list(elem):
+        _ensure_namespace_recursive(child)
+
+def _set_or_create_p(elem: ET.Element, name: str, value: str):
+    p = first(elem, f"./r:p[@name='{name}']")
+    if p is None:
+        p = ET.SubElement(elem, f"{{{NS['r']}}}p", {"name": name})
+    p.text = value
+
+def load_sector_fragment(sector: str) -> ET.Element:
+    """
+    Lee doc/<sector>.txt con un bloque <managedObject ...> ... </managedObject>
+    y lo retorna como Element con namespace RAML_NS aplicado.
+    """
+    path = Path(__file__).parent / "doc" / f"{sector}.txt"
+    if not path.exists():
+        raise FileNotFoundError(f"No se encontró el archivo del sector: {path}")
+    text = path.read_text(encoding="utf-8")
+    # Si el archivo trae múltiples líneas ajenas, intenta extraer el managedObject:
+    m = re.search(r"<managedObject\b.*?</managedObject>", text, flags=re.S | re.I)
+    frag = m.group(0) if m else text.strip()
+    mo = ET.fromstring(frag)
+    _ensure_namespace_recursive(mo)
+    return mo
+
+def insert_lncels_from_txt(
+    cmData: ET.Element,
+    lnBtsId: str,
+    eNBName: str,
+    sectors: List[str]
+):
+    """
+    Inserta uno o varios LNCEL leídos de TXT. Cambia sólo distName y cellName.
+    """
+    for sec in sectors:
+        idx = SECTOR_TO_LNCEL_INDEX.get(sec.strip().upper())
+        if not idx:
+            continue
+        # Cargar fragmento y namespaciado
+        try:
+            mo = load_sector_fragment(sec)
+        except Exception as e:
+            raise RuntimeError(f"Error al leer {sec}.txt: {e}")
+        # Validación básica
+        if mo.tag != f"{{{NS['r']}}}managedObject":
+            raise RuntimeError(f"El archivo de {sec} no contiene un <managedObject> válido.")
+        # Asegurar atributos mínimos
+        mo.set("distName", f"MRBTS-{lnBtsId}/LNBTS-{lnBtsId}/LNCEL-{idx}")
+        # cellName = "<eNBName>_<sector>"
+        _set_or_create_p(mo, "cellName", f"{eNBName}_{sec}")
+        # Insertar al final del cmData
+        cmData.append(mo)
+
 # ===================== Construcción desde plantilla fija =====================
 def build_xml_from_row_using_template(
     row: pd.Series,
@@ -538,7 +600,9 @@ def build_xml_from_row_using_template(
     iprt_dest: Optional[str] = None,
     iprt_gateway: Optional[str] = None,
     top_master_override: Optional[str] = None,
-    iprt_index: int = IPRT_INDEX_DEFAULT
+    iprt_index: int = IPRT_INDEX_DEFAULT,
+    cell_suffix: Optional[str] = None,
+    lncels_from_txt: Optional[List[str]] = None,   # NUEVO: lista de sectores a insertar desde TXT
 ) -> bytes:
     missing = validate_required(row)
     if missing:
@@ -572,7 +636,9 @@ def build_xml_from_row_using_template(
     # Nombres y ubicación
     set_bts_name(cmData, enbName)
     set_param_global(cmData, "enbName", enbName, True)
-    cellName_final = cellName_excel or (f"{enbName}_T1" if enbName else "")
+    # Si Excel no trae cellName, usar sufijo seleccionado (por defecto T1)
+    suffix = (cell_suffix or "T1").strip() if enbName else ""
+    cellName_final = cellName_excel or (f"{enbName}_{suffix}" if enbName and suffix else "")
     if cellName_final:
         set_param_global(cmData, "cellName", cellName_final, True)
 
@@ -616,7 +682,7 @@ def build_xml_from_row_using_template(
         interface_row=row
     )
 
-    # ===== Compatibilidad: si pasan overrides, fuerza primer item del primer IPRT =====
+    # ===== Compatibilidad: si pasan overrides, fuerza primer item del IPRT elegido =====
     if iprt_dest or iprt_gateway:
         mo = _find_mo_by_class_and_dist_contains(cmData, "com.nokia.srbts.tnl:IPRT", f"/IPRT-{iprt_index}")
         if mo is not None:
@@ -632,6 +698,10 @@ def build_xml_from_row_using_template(
             if iprt_gateway:
                 gp = first(it, "./r:p[@name='gateway']") or ET.SubElement(it, f"{{{NS['r']}}}p", {"name":"gateway"})
                 gp.text = normalize_ip(iprt_gateway)
+
+    # ===== Inserción de LNCEL(s) desde TXT (opcional) =====
+    if lncels_from_txt:
+        insert_lncels_from_txt(cmData, lnBtsId=lnBtsId, eNBName=enbName, sectors=lncels_from_txt)
 
     # Fecha en header
     header_log = first(cmData, "./r:header/r:log")
@@ -653,12 +723,18 @@ class App(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("Clonador XML (Plantilla fija en ./doc)")
-        self.geometry("1020x680")
+        self.geometry("1120x740")
 
         self.df: Optional[pd.DataFrame] = None
         self.df_iprt: Optional[pd.DataFrame] = None
         self.filtered_names: List[str] = []
         self.selected_name: Optional[str] = None
+
+        # Sufijo por defecto para cellName global (se mantiene tu comportamiento previo)
+        self.sector_var_default = tk.StringVar(value="T1")  # L1/L2/L3/T1/T2/T3
+
+        # Sectores para insertar LNCEL desde TXT (multi-selección)
+        self.sector_vars_multi: Dict[str, tk.BooleanVar] = {k: tk.BooleanVar(value=False) for k in ["L1","L2","L3","T1","T2","T3"]}
 
         self._build_widgets()
 
@@ -679,6 +755,20 @@ class App(tk.Tk):
         self.btn_reload = ttk.Button(top, text="Cargar Excel...", command=self.on_reload_excel)
         self.btn_reload.pack(side=tk.LEFT, padx=6)
 
+        # Sufijo cellName GLOBAL (como antes)
+        sector_frame = ttk.LabelFrame(self, text="Sufijo cellName GLOBAL (si Excel no trae 'cellName')", padding=(10, 6))
+        sector_frame.pack(fill=tk.X, padx=10)
+        for val in ("L1", "L2", "L3", "T1", "T2", "T3"):
+            rb = ttk.Radiobutton(sector_frame, text=val, value=val, variable=self.sector_var_default)
+            rb.pack(side=tk.LEFT, padx=6)
+
+        # Sectores para insertar LNCEL desde TXT (multi)
+        multi_frame = ttk.LabelFrame(self, text="Sectores a CREAR desde TXT (se pueden varios)", padding=(10, 6))
+        multi_frame.pack(fill=tk.X, padx=10, pady=(4, 0))
+        for i, val in enumerate(("L1", "L2", "L3", "T1", "T2", "T3")):
+            cb = ttk.Checkbutton(multi_frame, text=val, variable=self.sector_vars_multi[val])
+            cb.pack(side=tk.LEFT, padx=8)
+
         middle = ttk.Panedwindow(self, orient=tk.HORIZONTAL); middle.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
         left = ttk.Frame(middle); middle.add(left, weight=1)
         ttk.Label(left, text="Resultados (eNBName)").pack(anchor="w")
@@ -689,7 +779,7 @@ class App(tk.Tk):
         ttk.Label(right, text="Detalle de la fila seleccionada").pack(anchor="w")
         self.tree = ttk.Treeview(right, columns=("col", "val"), show="headings", height=18)
         self.tree.heading("col", text="Columna"); self.tree.heading("val", text="Valor")
-        self.tree.column("col", width=340, anchor="w"); self.tree.column("val", width=560, anchor="w")
+        self.tree.column("col", width=360, anchor="w"); self.tree.column("val", width=620, anchor="w")
         self.tree.pack(fill=tk.BOTH, expand=True)
         yscroll = ttk.Scrollbar(right, orient="vertical", command=self.tree.yview)
         self.tree.configure(yscrollcommand=yscroll.set); yscroll.place(in_=self.tree, relx=1.0, rely=0, relheight=1.0, x=-1)
@@ -754,6 +844,9 @@ class App(tk.Tk):
         if miss:
             messagebox.showwarning("Validación", "Faltan campos obligatorios en la fila: " + ", ".join(miss))
 
+    def _get_selected_sectors_multi(self) -> List[str]:
+        return [k for k, var in self.sector_vars_multi.items() if var.get()]
+
     def on_generate_xml(self):
         if self.df is None or not self.selected_name:
             messagebox.showinfo("Info", "Selecciona primero un eNBName en la lista."); return
@@ -770,6 +863,11 @@ class App(tk.Tk):
         dest_ip, gw_ip = find_iprouting_values(self.df_iprt, lnBtsId, eNBName)
         top_master_override = dest_ip  # opcional: setear TOPF.masterIpAddr igual al "dest" genérico
 
+        # Sectores seleccionados para insertar desde TXT
+        sectors_multi = self._get_selected_sectors_multi()
+        if not sectors_multi:
+            # No es error: simplemente no se insertan LNCEL extra
+            pass
         try:
             xml_bytes = build_xml_from_row_using_template(
                 row,
@@ -777,8 +875,12 @@ class App(tk.Tk):
                 iprt_dest=dest_ip,
                 iprt_gateway=gw_ip,
                 top_master_override=top_master_override,
-                iprt_index=IPRT_INDEX_DEFAULT
+                iprt_index=IPRT_INDEX_DEFAULT,
+                cell_suffix=self.sector_var_default.get(),  # mantiene el comportamiento de cellName global
+                lncels_from_txt=sectors_multi,              # NUEVO: inserción de LNCEL desde TXT
             )
+        except FileNotFoundError as e:
+            messagebox.showerror("Archivo faltante", str(e)); return
         except Exception as e:
             messagebox.showerror("Error al generar XML", str(e)); return
 

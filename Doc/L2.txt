@@ -1,42 +1,37 @@
-<managedObject class="NOKLTE:LNCEL" distName="MRBTS-18097/LNBTS-18097/LNCEL-151" version="xL24R3_2413_110" operation="create">
-<p name="a1TimeToTriggerDeactInterMeas">640ms</p>
-<p name="a2RedirectQci1">disabled</p>
-<p name="a2TimeToTriggerActGERANMeas">0ms</p>
-<p name="a2TimeToTriggerActInterFreqMeas">640ms</p>
-<p name="a2TimeToTriggerActWcdmaMeas">320ms</p>
-<p name="a2TimeToTriggerRedirect">1280ms</p>
-<p name="a3Offset">12</p>
+<managedObject class="NOKLTE:LNCEL" distName="MRBTS-4486/LNBTS-4486/LNCEL-1" version="xL24R3_2413_110" operation="create">
+<p name="a1TimeToTriggerDeactInterMeas">480ms</p>
+<p name="a2RedirectQci1">enabled</p>
+<p name="a2TimeToTriggerActInterFreqMeas">480ms</p>
+<p name="a2TimeToTriggerRedirect">256ms</p>
+<p name="a3Offset">6</p>
 <p name="a3ReportAmount">infinity</p>
 <p name="a3ReportInterval">640ms</p>
-<p name="a3TimeToTrigger">80ms</p>
+<p name="a3TimeToTrigger">320ms</p>
 <p name="a3TriggerQuantityHO">RSRP</p>
 <p name="a5ReportAmount">infinity</p>
-<p name="a5ReportInterval">240ms</p>
-<p name="a5TimeToTrigger">100ms</p>
+<p name="a5ReportInterval">640ms</p>
+<p name="a5TimeToTrigger">320ms</p>
 <p name="a5TriggerQuantityIntraFreqHO">RSRP</p>
-<p name="act3fdd3tddRestrict">false</p>
 <p name="actAcHpsLimits">false</p>
 <p name="actAir2Ground">false</p>
 <p name="actAmle">false</p>
-<p name="actAmleServCellFilter">false</p>
 <p name="actAntPortMap">false</p>
 <p name="actB1ReturnTo5GSA">false</p>
 <p name="actCaArchEnhImp">off</p>
 <p name="actCaBlocking">false</p>
 <p name="actCaScellSchedWeightFactor">false</p>
-<p name="actCarelCounters">true</p>
+<p name="actCarelCounters">false</p>
 <p name="actCsiRsSubFNonTM9Sch">false</p>
-<p name="actDataSessionProf">true</p>
+<p name="actDataSessionProf">false</p>
 <p name="actDeltaCqiAgingScellChEst">false</p>
-<p name="actDl256QamChQualEst">true</p>
-<p name="actDlPwBackoff">true</p>
+<p name="actDlPwBackoff">false</p>
 <p name="actDlsLdAdaptPf">false</p>
-<p name="actDlsOldtc">true</p>
+<p name="actDlsOldtc">false</p>
 <p name="actDlsVoicePacketAgg">true</p>
 <p name="actDownSampling">false</p>
-<p name="actDrx">true</p>
+<p name="actDrx">false</p>
 <p name="actDrxDuringMeasGap">false</p>
-<p name="actDrxDuringTTIB">true</p>
+<p name="actDrxDuringTTIB">false</p>
 <p name="actDynamicDataSessionProf">false</p>
 <p name="actEDrxIdle">false</p>
 <p name="actEicic">false</p>
@@ -58,13 +53,13 @@
 <p name="actInterFreqSPIDBasedHo">none</p>
 <p name="actIntraFreqLoadBal">false</p>
 <p name="actLBSpidUeSel">false</p>
-<p name="actLdPdcch">true</p>
+<p name="actLdPdcch">false</p>
 <p name="actMaxNumUeDlNonGbr">0</p>
 <p name="actMcsUpgrade">Disabled</p>
-<p name="actMicroDtx">false</p>
+<p name="actMicroDtx">true</p>
 <p name="actMicroDtxDrxOptPatterns">false</p>
-<p name="actModulationSchemeDl">256QAM</p>
-<p name="actModulationSchemeUL">256QAMand16QAMHighMCS</p>
+<p name="actModulationSchemeDl">QPSK</p>
+<p name="actModulationSchemeUL">QPSK</p>
 <p name="actNbrForNonGbrBearers">false</p>
 <p name="actNoIntraBandIFMeasurements">false</p>
 <p name="actNrCovEndcHo">disabled</p>
@@ -73,7 +68,7 @@
 <p name="actPdcchQci1SrbControl">false</p>
 <p name="actPeriodicB1NRMeas">disabled</p>
 <p name="actPeriodical5GRedirect">false</p>
-<p name="actProactSchedBySrb">false</p>
+<p name="actProactSchedBySrb">true</p>
 <p name="actProvideNrcgiEndc">false</p>
 <p name="actPrsTxDiv">false</p>
 <p name="actPttOverbooking">false</p>
@@ -82,71 +77,58 @@
 <p name="actQci1BlerTgt">false</p>
 <p name="actQci1RfDrx">false</p>
 <p name="actQci1eVTT">false</p>
-<p name="actRbr">false</p>
 <p name="actReducedFormat">false</p>
 <p name="actReqDiffFallbacks">false</p>
-<p name="actResourceAllocType1">true</p>
+<p name="actResourceAllocType1">false</p>
 <p name="actReturnTo5GSA">disabled</p>
 <p name="actRrcConnRelDelayForwarding">false</p>
 <p name="actScellBadChQualExtMonitor">false</p>
 <p name="actScellConfigForHiDemand">false</p>
 <p name="actServBasedHoQciX">false</p>
-<p name="actServRlqInterFreqLB">false</p>
 <p name="actSixIfMeasurements">false</p>
 <p name="actSmartDrx">false</p>
-<p name="actSrb1Robustness">true</p>
+<p name="actSrb1Robustness">false</p>
 <p name="actTaDisconnect">false</p>
-<p name="actTcpServiceDiff">true</p>
-<p name="actTcpUlPowerBoost">true</p>
-<p name="actTtiBundling">true</p>
-<p name="actTtibAcqi">false</p>
-<p name="actTtibRsc">true</p>
+<p name="actTcpServiceDiff">false</p>
+<p name="actTtiBundling">false</p>
 <p name="actUca">false</p>
 <p name="actUePowerBasedMobThr">false</p>
-<p name="actUl256QamChQualEst">true</p>
-<p name="actUlDynamicTargetBler">true</p>
+<p name="actUlDynamicTargetBler">false</p>
 <p name="actUlGrpHop">false</p>
-<p name="actUlLnkAdp">fUlLa</p>
+<p name="actUlLnkAdp">eUlLa</p>
 <p name="actUlVarianceAdapt">false</p>
-<p name="actUlpcMethod">PuschIAwPucchCL</p>
-<p name="actUlpcRachPwrCtrl">true</p>
+<p name="actUlpcMethod">PuschOLPucchOL</p>
+<p name="actUlpcRachPwrCtrl">false</p>
 <p name="actUlsLdAdaptPf">false</p>
-<p name="actUlsOptimizePrbMcs">true</p>
-<p name="actVoLteSrcRate">true</p>
-<p name="actVoipCovBoost">true</p>
-<p name="actVoipCovBoostEnh">on_ttib_entry_BLER_SINR_based</p>
-<p name="adaptPdcchDwellTime">100</p>
+<p name="actUlsOptimizePrbMcs">false</p>
+<p name="actVoLteSrcRate">false</p>
+<p name="actVoipCovBoost">false</p>
+<p name="actVoipCovBoostEnh">off</p>
 <p name="addGbrTrafficRrHo">5</p>
 <p name="addGbrTrafficTcHo">10</p>
 <p name="addSpectrEmi">1</p>
-<p name="administrativeState">unlocked</p>
+<p name="administrativeState">locked</p>
 <p name="allowPbIndexZero">false</p>
-<p name="allowTrafficConcentration">false</p>
+<p name="allowTrafficConcentration">true</p>
 <p name="amRlcSnFieldLengthDl">10bit</p>
 <p name="amleMaxNumHo">10</p>
-<p name="amlePeriodLoadExchange">10000ms</p>
-<p name="caPoolId">1</p>
+<p name="amlePeriodLoadExchange">1000ms</p>
+<p name="assignedVoLteQualProfile">0</p>
 <p name="cellIndOffServ">0dB</p>
-<p name="cellName">BOG.IND Grupo Aval Cra13_T1</p>
-<p name="cellPwrRedForMBMS">0</p>
-<p name="cellResourceScellMode">NoScellDefaultGroupUsage</p>
+<p name="cellName">NEI.Jose Carbonell_L2</p>
 <p name="cellResourceSharingMode">none</p>
 <p name="cellTechnology">FDD</p>
 <p name="cellType">large</p>
 <p name="cqiAperEnable">true</p>
 <p name="cqiAperMode">FBT2</p>
-<p name="cqiPerSbCycK">1</p>
 <p name="cqiPerSimulAck">true</p>
 <p name="csgType">openAccess</p>
 <p name="dSrTransMax">64n</p>
 <p name="defPagCyc">128rf</p>
-<p name="deltaLbCioMargin">0</p>
 <p name="deltaPreMsg3">1</p>
 <p name="deltaTfEnabled">false</p>
-<p name="dl256QamDeactChQualThr">13</p>
-<p name="dl256QamReactChQualThr">22</p>
 <p name="dlCaCqiWindow">50</p>
-<p name="dlCaMinPcellCqi">0</p>
+<p name="dlCaMinPcellCqi">6</p>
 <p name="dlCaMinPcellCqiQci1">0</p>
 <p name="dlCellPwrRed">0</p>
 <p name="dlInterferenceEnable">false</p>
@@ -156,94 +138,80 @@
 <p name="dlPathlossChg">3 db</p>
 <p name="dlPcfichBoost">0</p>
 <p name="dlPhichBoost">0</p>
-<p name="dlSrbCqiOffset">-20</p>
-<p name="dlTargetBler">150</p>
+<p name="dlTargetBler">100</p>
 <p name="dlamcCqiDef">2</p>
 <p name="dlamcEnable">true</p>
 <p name="dlsDciCch">DCI format 1C</p>
-<p name="dlsOldtcTarget">98</p>
 <p name="dlsUsePartPrb">PRBs with PSS or SSS and PBCH used</p>
+<p name="eTputFilterConfig">51</p>
+<p name="eTputInitMcs">20</p>
 <p name="eUlLaAtbPeriod">30</p>
 <p name="eUlLaBlerAveWin">30</p>
 <p name="eUlLaDeltaMcs">3</p>
-<p name="eUlLaLowMcsThr">3</p>
-<p name="eUlLaLowPrbThr">3</p>
+<p name="eUlLaLowMcsThr">1</p>
+<p name="eUlLaLowPrbThr">1</p>
 <p name="eUlLaPrbIncDecFactor">16</p>
 <p name="ecidMeasSupervisionTimer">3000</p>
 <p name="enableAmcPdcch">true</p>
 <p name="enableBetterCellHo">true</p>
 <p name="enableCovHo">true</p>
-<p name="enableLowAgg">true</p>
+<p name="enableLowAgg">false</p>
 <p name="enablePcPdcch">true</p>
-<p name="expectedCellSize">2.1km</p>
-<p name="fUlLAAtbTrigThr">-2</p>
+<p name="expectedCellSize">15km</p>
 <p name="filterCoeff">fc4</p>
-<p name="filterCoefficientCSFBCpichEcn0">fc4</p>
-<p name="filterCoefficientCSFBCpichRscp">fc4</p>
 <p name="filterCoefficientCpichEcn0">fc4</p>
 <p name="filterCoefficientCpichRscp">fc4</p>
 <p name="filterCoefficientRSRP">fc4</p>
 <p name="filterCoefficientRSRQ">fc4</p>
-<p name="filterCoefficientRSSI">fc2</p>
 <p name="gbrCongHandling">none</p>
 <p name="grpAssigPUSCH">0</p>
 <p name="harqMaxMsg3">5</p>
 <p name="harqMaxTrDl">5</p>
 <p name="harqMaxTrSignalingDl">8</p>
-<p name="harqMaxTrUlTtiBundling">12</p>
 <p name="harqMaxTrVoLteDl">8</p>
 <p name="harqMaxTxUl">5</p>
 <p name="hopModePusch">interSubFrame</p>
 <p name="hysA3Offset">0</p>
-<p name="hysThreshold2GERAN">0</p>
 <p name="hysThreshold2InterFreq">0</p>
-<p name="hysThreshold2Wcdma">0</p>
-<p name="hysThreshold2a">0</p>
+<p name="hysThreshold2a">4</p>
 <p name="hysThreshold3">0</p>
 <p name="hysThreshold4">0</p>
-<p name="iFLBA4ActLim">50</p>
 <p name="iFServiceBasedHoRetryTimer">60</p>
-<p name="idleLBCapThresh">30</p>
-<p name="idleLBCelResWeight">55</p>
+<p name="idleLBCapThresh">70</p>
+<p name="idleLBCapThreshCaUe">100</p>
 <p name="idleLBPercCaUe">0</p>
 <p name="idleLBPercUeTM9">0</p>
-<p name="idleLBPercentageOfUes">80</p>
+<p name="idleLBPercentageOfUes">0</p>
 <p name="ilReacTimerUl">0</p>
-<p name="inactivityTimer">7</p>
-<p name="inactivityTimerMult">2</p>
+<p name="inactivityTimer">10</p>
 <p name="inactivityTimerQci5Sign">0</p>
-<p name="iniDl256QamChQualEst">1s</p>
 <p name="iniMcsDl">4</p>
-<p name="iniMcsUl">4</p>
-<p name="iniPrbsUl">4</p>
-<p name="iniUl256QamChQualEst">1s</p>
+<p name="iniMcsUl">5</p>
+<p name="iniPrbsUl">10</p>
 <p name="lbLoadFilCoeff">4</p>
-<p name="lcrId">150</p>
+<p name="lcrId">3</p>
 <p name="longPeriodScellChEst">2000</p>
-<p name="lowerMarginCio">-10</p>
 <p name="lteNrDssMode">none</p>
 <p name="maxBitrateDl">170000</p>
-<p name="maxBitrateUl">60000</p>
+<p name="maxBitrateUl">110000</p>
 <p name="maxCrPgDl">12</p>
 <p name="maxCrRa4Dl">12</p>
 <p name="maxCrRaDl">12</p>
 <p name="maxCrRaDlHo">12</p>
 <p name="maxCrSibDl">26</p>
 <p name="maxGbrTrafficLimit">75</p>
-<p name="maxNbrTrafficLimit">90</p>
 <p name="maxNumCaUeScell">400</p>
-<p name="maxNumScells">2</p>
+<p name="maxNumScells">1</p>
 <p name="maxNumUeProactiveUl">10</p>
 <p name="maxNumUeProactiveUlNonTxSkip">10</p>
-<p name="maxNumVoLteProactUlGrantsPerTti">8</p>
+<p name="maxNumVoLteProactUlGrantsPerTti">0</p>
 <p name="maxPdcchAgg">16</p>
 <p name="maxPdcchAggHighLoad">16</p>
 <p name="maxPeriodicCqiIncrease">15</p>
 <p name="maxPhyCces">8</p>
-<p name="maxPrbsPerNbrUe">30</p>
-<p name="maxTcpUlPowerBoostUEs">5</p>
-<p name="mbrSelector">OaM</p>
-<p name="measQuantityCSFBUtra">cpichRSCP</p>
+<p name="mbrSelector">ueCapability</p>
+<p name="mdtxAggressiveness">12</p>
+<p name="mdtxPdcchSymb">1</p>
 <p name="measQuantityUtra">cpichEcN0</p>
 <p name="minBitrateDl">30</p>
 <p name="minBitrateUl">30</p>
@@ -257,65 +225,57 @@
 <p name="multLoadMeasRrmEicic">2</p>
 <p name="nbIoTMode">disabled</p>
 <p name="offsetFreqIntra">0dB</p>
-<p name="p0NomPucch">-100</p>
+<p name="p0NomPucch">-116</p>
 <p name="p0NomPusch">-80</p>
-<p name="pMax">370</p>
+<p name="pMax">441</p>
 <p name="pagingNb">quarterT</p>
 <p name="pdcchAggDefUe">4</p>
-<p name="pdcchAggMsg4">4</p>
+<p name="pdcchAggMsg4">8</p>
 <p name="pdcchAggPaging">4</p>
 <p name="pdcchAggPreamb">4</p>
 <p name="pdcchAggRaresp">4</p>
 <p name="pdcchAggRarespHo">4</p>
 <p name="pdcchAggSib">4</p>
 <p name="pdcchAlpha">16</p>
-<p name="pdcchCqiShift">-20</p>
+<p name="pdcchCqiShift">-50</p>
 <p name="pdcchCqiShift4Tx">0</p>
-<p name="pdcchHarqTargetBler">15</p>
+<p name="pdcchHarqTargetBler">10</p>
 <p name="pdcchOrderConfig">enabled</p>
 <p name="pdcchUlDlBal">10</p>
-<p name="perDl256QamChQualEst">15s</p>
-<p name="perUl256QamChQualEst">5s</p>
 <p name="periodicCqiFeedbackType">wideband</p>
-<p name="phyCellId">480</p>
+<p name="phyCellId">15</p>
 <p name="prachDetThresScaling">100</p>
 <p name="preventCellActivation">false</p>
-<p name="prsPowerBoost">0</p>
 <p name="puschAckOffI">10</p>
 <p name="puschCqiOffI">8</p>
 <p name="puschHarqMode">adaptive</p>
 <p name="puschRiOffI">10</p>
-<p name="qci1ProtectionTimer">15</p>
-<p name="raContResoT">32ms</p>
+<p name="qci1ProtectionTimer">20</p>
+<p name="raContResoT">64ms</p>
 <p name="raLargeMcsUl">5</p>
 <p name="raMsgPoffGrB">10 dB</p>
 <p name="raNondedPreamb">40</p>
 <p name="raPreGrASize">32</p>
 <p name="raRespWinSize">10</p>
 <p name="raSmallMcsUl">5</p>
-<p name="raSmallVolUl">56 bits</p>
-<p name="rcAmbrMgnDl">103</p>
-<p name="rcAmbrMgnUl">102</p>
+<p name="raSmallVolUl">144 bits</p>
 <p name="rcEnableDl">false</p>
 <p name="rcEnableUl">false</p>
 <p name="redBwEnDl">false</p>
-<p name="redBwMaxRbDl">75</p>
 <p name="redBwRpaEnUl">false</p>
 <p name="reqMaxCCsDlOffset">0</p>
-<p name="rttCsfbType">forbidden</p>
 <p name="sbHoMode">all</p>
-<p name="scellBadChQualThr">2</p>
+<p name="scellBadChQualThr">6</p>
 <p name="scellFastSchedulingSelect">normal</p>
-<p name="scellGoodChQualThr">4</p>
-<p name="scellNotDetectableThr">0</p>
+<p name="scellGoodChQualThr">8</p>
+<p name="scellNotDetectableThr">4</p>
 <p name="shortPeriodScellChEst">200</p>
-<p name="t301Guard">100</p>
+<p name="t301Guard">390</p>
 <p name="t302">8000</p>
-<p name="t304InterRAT">1000ms</p>
 <p name="t304InterRATGsm">500ms</p>
 <p name="t304IntraLte">1000ms</p>
-<p name="t304eNaccGsm">2000ms</p>
-<p name="t320">10min</p>
+<p name="t304eNaccGsm">4000ms</p>
+<p name="t320">180min</p>
 <p name="tExtendedWait">300</p>
 <p name="tLoadMeasX2">10000ms</p>
 <p name="tLoadMeasX2Eicic">2000</p>
@@ -329,93 +289,45 @@
 <p name="taMaxOffset">52</p>
 <p name="taTimer">10240</p>
 <p name="taTimerMargin">2000</p>
-<p name="tac">20013</p>
+<p name="tac">22201</p>
 <p name="targetSelMethod">SIB_based</p>
-<p name="tgtThreshPrId">1</p>
-<p name="threshold1">70</p>
-<p name="threshold2GERAN">0</p>
-<p name="threshold2GERANQci1">0</p>
-<p name="threshold2InterFreq">24</p>
-<p name="threshold2InterFreqQci1">35</p>
-<p name="threshold2Wcdma">22</p>
-<p name="threshold2WcdmaQci1">27</p>
-<p name="threshold2a">26</p>
-<p name="threshold2aQci1">38</p>
-<p name="threshold3">34</p>
-<p name="threshold3RsrqIntraFreq">-29</p>
-<p name="threshold3a">40</p>
-<p name="threshold3aRsrqIntraFreq">-25</p>
+<p name="threshold1">90</p>
+<p name="threshold2InterFreq">40</p>
+<p name="threshold2a">44</p>
+<p name="threshold2aQci1">46</p>
+<p name="threshold3">24</p>
+<p name="threshold3a">26</p>
 <p name="threshold4">18</p>
 <p name="timeToTriggerSfHigh">0.5</p>
 <p name="timeToTriggerSfMedium">0.5</p>
-<p name="tmpActFeat1">Bit 0</p>
-<p name="tmpActFeat2">0</p>
-<p name="tmpParam15">0</p>
-<p name="tmpParam16">0</p>
-<p name="tmpParam4">0</p>
-<p name="tmpParam5">0</p>
-<p name="tmpParam6">0</p>
-<p name="ttiBundlingBlerTarget">12</p>
-<p name="ttiBundlingBlerThreshold">12</p>
-<p name="ttiBundlingSinrThreshold">5</p>
 <p name="ttibAltUlPrbThreshold">0</p>
-<p name="ttibMinDelayAfterBearerSetup">0</p>
-<p name="ttibMinUlPrb">3</p>
-<p name="ttibOperMode">sinrBasedTtibOnOffAllowed</p>
-<p name="ttibSinrDwellTimeIn">200</p>
-<p name="ttibSinrDwellTimeOut">1000</p>
-<p name="ttibSinrThresholdIn">20</p>
-<p name="ttibSinrThresholdOut">24</p>
-<p name="ttibUlsMinTbs">144</p>
 <p name="ueLevelMroOffset">-3</p>
-<p name="ul256QamDeactChQualThr">5</p>
-<p name="ul256QamReactChQualThr">10</p>
 <p name="ulCaMinPcellSinr">0</p>
 <p name="ulCaMinPcellSinrQci1">0</p>
-<p name="ulCaSinrWindow">50</p>
 <p name="ulRsCs">0</p>
 <p name="ulScellConfigLevel">2</p>
 <p name="ulTargetBler">10</p>
-<p name="ulamcAllTbEn">true</p>
+<p name="ulamcAllTbEn">false</p>
 <p name="ulamcSwitchPer">30</p>
 <p name="ulatbEventPer">1</p>
 <p name="ulpcAlpha">alpha 1</p>
-<p name="ulpcReadPeriod">50</p>
 <p name="ulsFdPrbAssignAlg">MixedFD</p>
 <p name="ulsMaxPacketAgg">2</p>
-<p name="ulsMinRbNonTtibVolte">2</p>
-<p name="ulsMinRbPerUe">1</p>
-<p name="ulsMinTbs">72</p>
-<p name="ulsMinTbsNonTtibVolte">120</p>
-<p name="ulsNumSchedAreaUl">6</p>
-<p name="ulsOptimizePrbMinMcs">5</p>
-<p name="ulsSchedMethod">interference aware</p>
-<p name="upperMarginCio">10</p>
-<p name="voLteProactUlGrantNonTtibTxSkip">100</p>
-<p name="voLteProactUlGrantPeriodRegTx">100</p>
-<p name="voLteProactUlGrantPeriodTtib">100</p>
-<p name="voLteProactUlGrantPeriodTtibTxSkip">100</p>
+<p name="ulsMinRbPerUe">3</p>
+<p name="ulsMinTbs">104</p>
+<p name="ulsSchedMethod">channel unaware</p>
 <list name="dFListPucch">
 <item>
 <p name="dFpucchF1">0</p>
-<p name="dFpucchF1b">1</p>
+<p name="dFpucchF1b">3</p>
 <p name="dFpucchF2">0</p>
 <p name="dFpucchF2a">0</p>
 <p name="dFpucchF2b">0</p>
 </item>
 </list>
-<list name="dlPwBackoffStructure">
-<item>
-<p name="dlPwBackoffApp">QAMonly</p>
-<p name="dlPwBackoffThreshold">50</p>
-<p name="maxDlPwBackoffValue1">10</p>
-<p name="maxDlPwBackoffValue2">15</p>
-<p name="usageOfMaxDlPwBackoffValue2">QAM256r1r2r3r4</p>
-</item>
-</list>
 <list name="drxProfile101">
 <item>
-<p name="drxInactivityT">200</p>
+<p name="drxInactivityT">10</p>
 <p name="drxLongCycle">160ms</p>
 <p name="drxOnDuratT">6</p>
 <p name="drxProfileIndex">101</p>
@@ -425,7 +337,7 @@
 </list>
 <list name="drxProfile102">
 <item>
-<p name="drxInactivityT">2560</p>
+<p name="drxInactivityT">20</p>
 <p name="drxLongCycle">1280ms</p>
 <p name="drxOnDuratT">10</p>
 <p name="drxProfileIndex">102</p>
@@ -443,16 +355,6 @@
 <p name="drxRetransT">16</p>
 </item>
 </list>
-<list name="drxProfile104">
-<item>
-<p name="drxInactivityT">30</p>
-<p name="drxLongCycle">320</p>
-<p name="drxOnDuratT">6</p>
-<p name="drxProfileIndex">104</p>
-<p name="drxProfilePriority">40</p>
-<p name="drxRetransT">4</p>
-</item>
-</list>
 <list name="drxProfile105">
 <item>
 <p name="drxInactivityT">20</p>
@@ -463,50 +365,14 @@
 <p name="drxRetransT">16</p>
 </item>
 </list>
-<list name="eutranAccessPointPosition">
-<item>
-<p name="altitude">2559</p>
-<p name="confidence">0</p>
-<p name="degreesOfLatitude">437456</p>
-<p name="degreesOfLongitude">-3452015</p>
-<p name="directionOfAltitude">height</p>
-<p name="latitudeSign">north</p>
-<p name="orientationOfMajorAxis">0</p>
-<p name="uncertaintyAltitude">0</p>
-<p name="uncertaintySemiMajor">0</p>
-<p name="uncertaintySemiMinor">0</p>
-</item>
-</list>
-<list name="iFLBLoadThresholds">
-<item>
-<p name="iFLBBearCheckTimer">12</p>
-<p name="iFLBHighLoadGBRDL">95</p>
-<p name="iFLBHighLoadNonGBRDL">95</p>
-<p name="iFLBHighLoadPdcch">95</p>
-<p name="iFLBRetryTimer">120</p>
-<p name="maxNumAmleNeigh">16</p>
-</item>
-</list>
-<list name="intraFreqLbLoadThresholds">
-<item>
-<p name="highLoadGbrDl">95</p>
-<p name="highLoadNonGbrDl">95</p>
-<p name="highLoadPdcch">95</p>
-<p name="hysteresisLoadDlGbr">2</p>
-<p name="hysteresisLoadDlNonGbr">2</p>
-<p name="hysteresisLoadPdcch">2</p>
-<p name="loadBalancingProfile">medium</p>
-<p name="maxLbPartners">16</p>
-</item>
-</list>
 <list name="loadSettings">
 <item>
 <p name="cellCapClass">100</p>
 <p name="mlbEicicOperMode">allUes</p>
 <p name="nomNumPrbNonGbr">0.01</p>
-<p name="targetLoadGbrDl">95</p>
-<p name="targetLoadNonGbrDl">95</p>
-<p name="targetLoadPdcch">95</p>
+<p name="targetLoadGbrDl">50</p>
+<p name="targetLoadNonGbrDl">75</p>
+<p name="targetLoadPdcch">90</p>
 <p name="ulCacIgnore">false</p>
 <p name="ulCacSelection">ulReflectDlCac</p>
 <p name="ulStaticCac">100</p>
@@ -515,90 +381,15 @@
 <list name="pcellSwapConfig">
 <item>
 <p name="disableVideoGbrPcellSwap">QCI_67</p>
-<p name="enableVoLteUePcellSwap">UesWithoutVoLte</p>
+<p name="enableVoLteUePcellSwap">AllUes</p>
 <p name="numCaUeThreshold">40</p>
 <p name="pcellSwapMaxHoRate">5</p>
 <p name="pFreqPrio">1</p>
 <p name="puschLoadHysteresis">10</p>
-<p name="puschLoadIndexThr">10</p>
+<p name="puschLoadIndexThr">0.1</p>
 <p name="scellChQualThreshold">8</p>
 <p name="scellStateForPcellSwap">activated</p>
 <p name="ulSinrLowThreshold">12</p>
-</item>
-</list>
-<list name="perMeasLocServ">
-<item>
-<p name="reportAmountPerLoc">2</p>
-<p name="reportIntervalPerLoc">640ms</p>
-</item>
-</list>
-<list name="prsMuting">
-<item>
-<p name="prsMutingInfo">0</p>
-<p name="prsMutingInfoPatternLen">8 bits</p>
-</item>
-</list>
-<list name="redBwRbUlConfig">
-<item>
-<p name="redBwMaxRbUl">75</p>
-<p name="redBwMinRbUl">1</p>
-</item>
-</list>
-<list name="rsrqMobilityParams">
-<item>
-<p name="a1ReportInterval">640ms</p>
-<p name="a2TimeToTriggerMobRsrq">480ms</p>
-<p name="hysThreshold2MobRsrq">0</p>
-<p name="threshold2aRsrq">14</p>
-<p name="threshold2MobRsrq">12</p>
-</item>
-</list>
-<list name="tcpServiceDiffConfig">
-<item>
-<p name="boostGuardTime">20000</p>
-<p name="dlMaxBoostBytes">100000</p>
-<p name="dlMinBoostBytes">1000</p>
-<p name="minTcpPacketSize">100</p>
-<p name="timeBetweenTcpPackets">10000</p>
-<p name="timeNextBoostingRound">10000</p>
-<p name="ulMaxBoostBytes">100000</p>
-<p name="ulMinBoostBytes">300</p>
-</item>
-</list>
-<list name="ulpcIAwConfig">
-<item>
-<p name="p0NomPuschIAw">-100</p>
-<p name="ulpcCEBalanceIAw">10</p>
-<p name="ulpcIAwSinrTopMargin">20</p>
-<p name="ulpcMinQualIAw">10</p>
-<p name="ulpcMinWaitForPc">25</p>
-<p name="ulpcRefPwrIAw">-208</p>
-</item>
-</list>
-<list name="ulpcPucchConfig">
-<item>
-<p name="ulpcLowlevCch">-103</p>
-<p name="ulpcLowqualCch">1</p>
-<p name="ulpcUplevCch">-96</p>
-<p name="ulpcUpqualCch">4</p>
-</item>
-</list>
-<list name="ulpcPuschConfig">
-<item>
-<p name="ulpcLowlevSch">-106</p>
-<p name="ulpcLowqualSch">9</p>
-<p name="ulpcUplevSch">-99</p>
-<p name="ulpcUpqualSch">15</p>
-</item>
-</list>
-<list name="voipCovBoostConfig">
-<item>
-<p name="ttibPhrDwellTimeIn">200</p>
-<p name="ttibPhrDwellTimeOut">1000</p>
-<p name="ulsMaxNumPrbAfterCovBoost">2</p>
-<p name="ulsMinNumCoverageLimitationStateCheck">10</p>
-<p name="ulsPhrQci1Hyst">5</p>
-<p name="ulsPhrQci1Low">0</p>
 </item>
 </list>
 </managedObject>

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import io
 import re
 import ipaddress
@@ -15,11 +16,15 @@ SHEET_NAME = "Interface"
 IPROUTING_SHEET = "IpRouting"
 IPRT_INDEX_DEFAULT = 2
 
+# Namespace RAML
 RAML_NS = "raml21.xsd"
 ET.register_namespace('', RAML_NS)
 NS = {"r": RAML_NS}
 
+# Plantilla general (flujo completo)
 TEMPLATE_PATH = Path(__file__).parent / "doc" / "Configuration_scf_template.xml"
+# Plantilla específica para botón "Generar XML (solo cellName)"
+PLANTILLA_CELLNAME_PATH = Path(__file__).parent / "doc" / "plantilla.xml"
 
 DEFAULT_LOCATIONS = [
     Path(__file__).parent / "doc" / "data.xlsx",
@@ -59,7 +64,7 @@ COLUMN_ALIASES_IPRT = {
 
 REQUIRED_COLUMNS = ["lnBtsId", "eNBName"]
 
-# ===================== Utils Excel =====================
+# ===================== Utilidades varias =====================
 def _canon_base(s: str) -> str:
     return " ".join(str(s).strip().lower().split())
 
@@ -202,14 +207,21 @@ def first(elem, query):
 def replace_all_mrbts_ids_anywhere(cmData, new_id: str):
     if not new_id or not re.fullmatch(r"\d+", str(new_id).strip()):
         return
-    pat = re.compile(r"MRBTS-\d+")
-    repl = f"MRBTS-{str(new_id).strip()}"
+    pat_mrbts = re.compile(r"MRBTS-\d+")
+    pat_lnbts = re.compile(r"LNBTS-\d+")
+    repl_m = f"MRBTS-{str(new_id).strip()}"
+    repl_l = f"LNBTS-{str(new_id).strip()}"
     for elem in cmData.iter():
         for k, v in list(elem.attrib.items()):
-            if isinstance(v, str) and pat.search(v):
-                elem.set(k, pat.sub(repl, v))
-        if isinstance(elem.text, str) and pat.search(elem.text):
-            elem.text = pat.sub(repl, elem.text)
+            if isinstance(v, str):
+                nv = pat_mrbts.sub(repl_m, v)
+                nv = pat_lnbts.sub(repl_l, nv)
+                if nv != v:
+                    elem.set(k, nv)
+        if isinstance(elem.text, str):
+            t = pat_mrbts.sub(repl_m, elem.text)
+            t = pat_lnbts.sub(repl_l, t)
+            elem.text = t
 
 def set_bts_name(cmData, new_name: str):
     mr = first(cmData, ".//r:managedObject[@class='com.nokia.srbts:MRBTS']")
@@ -381,20 +393,9 @@ def rebuild_static_routes_from_sheets_for_all_iprt(cmData: ET.Element, df_iprt: 
     for mo in [m for m in _iter_managed_objects(cmData) if m.get("class") == "com.nokia.srbts.tnl:IPRT"]:
         write_static_routes_to_mo(mo, items)
 
-def find_iprouting_values(df_iprt: Optional[pd.DataFrame], lnBtsId: str, eNBName: str) -> Tuple[Optional[str], Optional[str]]:
-    if df_iprt is None or df_iprt.empty: return (None, None)
-    row = None
-    if "lnBtsId" in df_iprt.columns and lnBtsId:
-        m = df_iprt["lnBtsId"].astype(str).str.strip() == str(lnBtsId).strip()
-        if m.any(): row = df_iprt[m].iloc[0]
-    if row is None and "eNBName" in df_iprt.columns and eNBName:
-        m = df_iprt["eNBName"].astype(str).str.strip() == str(eNBName).strip()
-        if m.any(): row = df_iprt[m].iloc[0]
-    if row is None: row = df_iprt.iloc[0]
-    return (normalize_ip(sval(row, "iprtDest")) or None, normalize_ip(sval(row, "iprtGateway")) or None)
-
 # ===================== LNCEL helpers =====================
 SECTOR_TO_LNCEL_INDEX = {"L1":1,"L2":2,"L3":3,"T1":1,"T2":2,"T3":3}
+PARAM_COLS_OPT = ["phyCellId","tac","prachFreqOff","rootSeqIndex","prachCS","prachConfIndex","earfcnDL","pMax"]
 
 def _ensure_namespace_recursive(elem: ET.Element):
     if not elem.tag.startswith("{"):
@@ -408,29 +409,14 @@ def _set_or_create_p(elem: ET.Element, name: str, value: str):
         p = ET.SubElement(elem, f"{{{NS['r']}}}p", {"name": name})
     p.text = value
 
-def load_sector_fragment(sector: str) -> ET.Element:
-    """
-    Lee doc/<sector>.txt y extrae el PRIMER bloque <managedObject ...>...</managedObject>,
-    ignorando BOM, encabezados XML y texto extra.
-    """
-    path = Path(__file__).parent / "doc" / f"{sector}.txt"
-    if not path.exists():
-        raise FileNotFoundError(f"No se encontró el archivo del sector: {path}")
-    text = path.read_text(encoding="utf-8", errors="ignore")
-    text = text.lstrip("\ufeff").strip()
-    text = re.sub(r"^\s*<\?xml[^>]*\?>", "", text, flags=re.I)
-    matches = list(re.finditer(r"<managedObject\b.*?</managedObject>", text, flags=re.S | re.I))
-    if not matches:
-        pos = text.lower().find("<managedobject")
-        if pos >= 0:
-            text = text[pos:]
-            matches = list(re.finditer(r"<managedObject\b.*?</managedObject>", text, flags=re.S | re.I))
-    if not matches:
-        raise RuntimeError(f"El archivo {path.name} no contiene un bloque <managedObject> válido.")
-    frag = matches[0].group(0).strip()
-    mo = ET.fromstring(frag)
-    _ensure_namespace_recursive(mo)
-    return mo
+def _norm_decimal(val: Optional[str]) -> Optional[str]:
+    if val is None: return None
+    s = str(val).strip().replace(",", ".")
+    return s if s else None
+
+def _set_if_has(elem: ET.Element, name: str, value: Optional[str]):
+    if value is None: return
+    _set_or_create_p(elem, name, value)
 
 def _sector_from_cellname(cellname: str) -> Optional[str]:
     m = re.search(r"_(L[123]|T[123])$", cellname.strip(), flags=re.I)
@@ -440,16 +426,147 @@ def _enb_from_cellname(cellname: str) -> str:
     sec = _sector_from_cellname(cellname) or ""
     return cellname[:-(len(sec)+1)].strip() if sec and cellname.endswith(f"_{sec}") else cellname.strip()
 
-PARAM_COLS_OPT = ["phyCellId","tac","prachFreqOff","rootSeqIndex","prachCS","prachConfIndex","earfcnDL","pMax"]
+# -------- Lectores de TXT de sectores y puertos --------
+def _extract_managed_objects_from_text(text: str) -> List[ET.Element]:
+    """Devuelve TODOS los <managedObject>…</managedObject> del texto."""
+    text = text.lstrip("\ufeff")
+    text = re.sub(r"<\?xml[^>]*\?>", "", text, flags=re.I)
+    mos = []
+    for m in re.finditer(r"<managedObject\b.*?</managedObject>", text, flags=re.S | re.I):
+        frag = m.group(0)
+        try:
+            mo = ET.fromstring(frag)
+            _ensure_namespace_recursive(mo)
+            mos.append(mo)
+        except ET.ParseError:
+            continue
+    return mos
 
-def _norm_decimal(val: Optional[str]) -> Optional[str]:
-    if val is None: return None
-    s = str(val).strip().replace(",", ".")
-    return s if s else None
+def load_sector_fragments(sector: str) -> List[ET.Element]:
+    path = Path(__file__).parent / "doc" / f"{sector}.txt"
+    if not path.exists():
+        raise FileNotFoundError(f"No se encontró el archivo del sector: {path}")
+    txt = path.read_text(encoding="utf-8", errors="ignore")
+    mos = _extract_managed_objects_from_text(txt)
+    if not mos:
+        raise RuntimeError(f"El archivo {path.name} no contiene bloques <managedObject> válidos.")
+    return mos
 
-def _set_if_has(elem: ET.Element, name: str, value: Optional[str]):
-    if value is None: return
-    _set_or_create_p(elem, name, value)
+def load_ports_fragments(sector: str) -> List[ET.Element]:
+    path = Path(__file__).parent / "doc" / f"SCRIP_PUERTOS_{sector}.txt"
+    if not path.exists():
+        return []  # opcional
+    txt = path.read_text(encoding="utf-8", errors="ignore")
+    return _extract_managed_objects_from_text(txt)
+
+def _replace_ids_in_element(elem: ET.Element, lnBtsId: str, lncel_idx: Optional[int]):
+    pat_mrbts = re.compile(r"MRBTS-\d+")
+    pat_lnbts = re.compile(r"LNBTS-\d+")
+    pat_lncel = re.compile(r"LNCEL-\d+")
+    repl_m = f"MRBTS-{lnBtsId}"
+    repl_l = f"LNBTS-{lnBtsId}"
+    repl_c = f"LNCEL-{lncel_idx}" if lncel_idx else None
+
+    for e in elem.iter():
+        # atributos
+        for k, v in list(e.attrib.items()):
+            if not isinstance(v, str): continue
+            nv = pat_mrbts.sub(repl_m, v)
+            nv = pat_lnbts.sub(repl_l, nv)
+            if repl_c: nv = pat_lncel.sub(repl_c, nv)
+            if nv != v:
+                e.set(k, nv)
+        # texto
+        if isinstance(e.text, str):
+            t = pat_mrbts.sub(repl_m, e.text)
+            t = pat_lnbts.sub(repl_l, t)
+            if repl_c: t = pat_lncel.sub(repl_c, t)
+            e.text = t
+
+def insert_lncels_and_ports_from_cellnames(cmData: ET.Element, lnBtsId: str, rows: List[Dict[str, str]]):
+    for r in rows:
+        cn = r["cellName"].strip()
+        sec = _sector_from_cellname(cn)
+        if not sec:  # si no hay sufijo L1/L2/… ignorar
+            continue
+        idx = SECTOR_TO_LNCEL_INDEX.get(sec)
+        if not idx:
+            continue
+
+        # 1) Sector base (L1.txt, T3.txt, etc.)
+        for mo in load_sector_fragments(sec):
+            _replace_ids_in_element(mo, lnBtsId, idx)
+            # Ajuste distName si es LNCEL
+            if mo.get("class", "").endswith(":LNCEL") or mo.get("class", "").endswith(":LNCEL_FDD"):
+                mo.set("distName", f"MRBTS-{lnBtsId}/LNBTS-{lnBtsId}/LNCEL-{idx}")
+                _set_or_create_p(mo, "cellName", cn)
+                # Parámetros opcionales
+                _set_if_has(mo, "phyCellId",      r.get("phyCellId"))
+                _set_if_has(mo, "tac",            r.get("tac"))
+                _set_if_has(mo, "prachFreqOff",   r.get("prachFreqOff"))
+                _set_if_has(mo, "rootSeqIndex",   r.get("rootSeqIndex"))
+                _set_if_has(mo, "prachCS",        r.get("prachCS"))
+                _set_if_has(mo, "prachConfIndex", r.get("prachConfIndex"))
+                _set_if_has(mo, "earfcnDL",       r.get("earfcnDL"))
+                _set_if_has(mo, "pMax",           _norm_decimal(r.get("pMax")))
+            else:
+                # en cualquier otro MO, si trae p name=cellName, reemplazar por el cn
+                p_cn = first(mo, "./r:p[@name='cellName']")
+                if p_cn is not None:
+                    p_cn.text = cn
+            cmData.append(mo)
+
+        # 2) Puertos del sector (SCRIP_PUERTOS_L1.txt, etc.)
+        for mo in load_ports_fragments(sec):
+            _replace_ids_in_element(mo, lnBtsId, idx)
+            # Actualizar cellName si aparece como parámetro
+            p_cn = first(mo, "./r:p[@name='cellName']")
+            if p_cn is not None:
+                p_cn.text = cn
+            cmData.append(mo)
+
+# ===================== Lector robusto de plantilla (evita "junk after document element") =====================
+def _clean_text_to_single_raml_root(raw: str) -> str:
+    """
+    Devuelve un documento con UN solo root <raml>…</raml>.
+    - Quita BOM y prólogos.
+    - Si <raml …/> está autocerrado, lo abre.
+    - Si falta </raml>, lo agrega tras el último </cmData>.
+    - Ignora restos antes o después del bloque.
+    """
+    if not isinstance(raw, str):
+        raw = raw.decode("utf-8", "ignore")
+
+    s = raw.lstrip("\ufeff")
+    s = re.sub(r"<\?xml[^>]*\?>", "", s, flags=re.I)
+    s = s.strip()
+
+    m_start = re.search(r"<raml\b[^>]*?/?>", s, flags=re.I)
+    if not m_start:
+        raise ET.ParseError("No se encontró ninguna etiqueta <raml> en la plantilla.")
+
+    start_tag = m_start.group(0)
+    rest = s[m_start.end():]
+
+    # abrir si estaba autocerrado
+    start_tag = re.sub(r"/\s*>$", ">", start_tag)
+
+    m_end = re.search(r"</\s*raml\s*>", rest, flags=re.I)
+    if m_end:
+        core = start_tag + rest[:m_end.end()]
+    else:
+        # tratar de cerrar después del último </cmData>
+        cm_matches = list(re.finditer(r"</\s*cmData\s*>", rest, flags=re.I))
+        end_idx = cm_matches[-1].end() if cm_matches else len(rest)
+        core = start_tag + rest[:end_idx] + "</raml>"
+
+    return '<?xml version="1.0" encoding="UTF-8"?>\n' + core
+
+def _parse_xml_loose(path: Path) -> ET.ElementTree:
+    txt = path.read_text(encoding="utf-8", errors="ignore")
+    cleaned = _clean_text_to_single_raml_root(txt)
+    root = ET.fromstring(cleaned)
+    return ET.ElementTree(root)
 
 # ===================== Excel "solo cellName" =====================
 def _read_cellname_excel(path: Path) -> List[Dict[str, str]]:
@@ -461,14 +578,13 @@ def _read_cellname_excel(path: Path) -> List[Dict[str, str]]:
             header_row = i; break
     df = pd.read_excel(path, header=header_row, dtype=object)
 
-    # Mapa canónico de columnas
     cols_map = {c: _canon_base(str(c)) for c in df.columns}
 
     def get_val(row, wanted):
         canon = _canon_base(wanted)
         for c, cc in cols_map.items():
             if cc == canon:
-                v = row.get(c); 
+                v = row.get(c)
                 if pd.isna(v): return None
                 return str(v).strip()
         return None
@@ -485,55 +601,46 @@ def _read_cellname_excel(path: Path) -> List[Dict[str, str]]:
         raise RuntimeError("No hay valores en 'cellName'.")
     return rows
 
-def insert_lncels_from_cellnames(cmData: ET.Element, lnBtsId: str, rows: List[Dict[str, str]]):
-    for r in rows:
-        cn = r["cellName"]
-        sec = _sector_from_cellname(cn)
-        if not sec: continue
-        idx = SECTOR_TO_LNCEL_INDEX.get(sec)
-        if not idx: continue
-        mo = load_sector_fragment(sec)
-        if mo.tag != f"{{{NS['r']}}}managedObject":
-            raise RuntimeError(f"El archivo de {sec} no contiene un <managedObject> válido.")
-        mo.set("distName", f"MRBTS-{lnBtsId}/LNBTS-{lnBtsId}/LNCEL-{idx}")
-        _set_or_create_p(mo, "cellName", cn)
-        _set_if_has(mo, "phyCellId",      r.get("phyCellId"))
-        _set_if_has(mo, "tac",            r.get("tac"))
-        _set_if_has(mo, "prachFreqOff",   r.get("prachFreqOff"))
-        _set_if_has(mo, "rootSeqIndex",   r.get("rootSeqIndex"))
-        _set_if_has(mo, "prachCS",        r.get("prachCS"))
-        _set_if_has(mo, "prachConfIndex", r.get("prachConfIndex"))
-        _set_if_has(mo, "earfcnDL",       r.get("earfcnDL"))
-        _set_if_has(mo, "pMax",           _norm_decimal(r.get("pMax")))
-        cmData.append(mo)
-
 def build_xml_from_cellnames_using_template(rows: List[Dict[str, str]], lnBtsId: str) -> bytes:
-    if not TEMPLATE_PATH.exists():
-        raise FileNotFoundError(f"No encuentro la plantilla: {TEMPLATE_PATH}")
+    # Usar plantilla ESPECIAL de solo cellname
+    if not PLANTILLA_CELLNAME_PATH.exists():
+        raise FileNotFoundError(f"No encuentro la plantilla: {PLANTILLA_CELLNAME_PATH}")
     if not rows:
         raise RuntimeError("No se recibieron filas 'cellName'.")
+
     enb = _enb_from_cellname(rows[0]["cellName"])
 
-    tree = ET.parse(str(TEMPLATE_PATH))
+    # Parseo tolerante
+    try:
+        tree = _parse_xml_loose(PLANTILLA_CELLNAME_PATH)
+    except ET.ParseError as e:
+        raise RuntimeError(f"La plantilla '{PLANTILLA_CELLNAME_PATH.name}' tiene formato XML inválido.\nDetalle: {e}")
+
     root = tree.getroot()
     cmData = first(root, "./r:cmData")
     if cmData is None:
         raise RuntimeError("No se encontró <cmData> en la plantilla.")
 
+    # Reemplazos globales
     replace_all_mrbts_ids_anywhere(cmData, lnBtsId)
     set_bts_name(cmData, enb)
     set_param_global(cmData, "enbName", enb, True)
     set_param_global(cmData, "moduleLocation", enb, True)
     ensure_top_splane_points_to_ipif3(cmData)
 
-    insert_lncels_from_cellnames(cmData, lnBtsId=lnBtsId, rows=rows)
+    # Insertar sectores + puertos desde TXT
+    insert_lncels_and_ports_from_cellnames(cmData, lnBtsId=lnBtsId, rows=rows)
 
+    # Actualizar timestamp de header
     header_log = first(cmData, "./r:header/r:log")
     if header_log is not None:
         header_log.set("dateTime", datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ"))
+
     bio = io.BytesIO()
-    try: ET.indent(tree, space="  ", level=0)
-    except Exception: pass
+    try:
+        ET.indent(tree, space="  ", level=0)
+    except Exception:
+        pass
     tree.write(bio, encoding="utf-8", xml_declaration=True)
     bio.seek(0)
     return bio.read()
@@ -617,10 +724,10 @@ def build_xml_from_row_using_template(
         for sec in lncels_from_txt:
             idx = SECTOR_TO_LNCEL_INDEX.get(sec.strip().upper())
             if not idx: continue
-            mo = load_sector_fragment(sec)
-            mo.set("distName", f"MRBTS-{lnBtsId}/LNBTS-{lnBtsId}/LNCEL-{idx}")
-            _set_or_create_p(mo, "cellName", f"{enbName}_{sec}")
-            cmData.append(mo)
+            for mo in load_sector_fragments(sec.strip().upper()):
+                _replace_ids_in_element(mo, lnBtsId, idx)
+                _set_or_create_p(mo, "cellName", f"{enbName}_{sec.strip().upper()}")
+                cmData.append(mo)
 
     header_log = first(cmData, "./r:header/r:log")
     if header_log is not None:
@@ -802,8 +909,8 @@ class App(tk.Tk):
         messagebox.showinfo("Listo", f"XML generado:\n{out_path}")
 
     def on_generate_from_cellname_excel(self):
-        if not TEMPLATE_PATH.exists():
-            messagebox.showerror("Plantilla faltante", f"No encuentro la plantilla:\n{TEMPLATE_PATH}")
+        if not PLANTILLA_CELLNAME_PATH.exists():
+            messagebox.showerror("Plantilla faltante", f"No encuentro la plantilla:\n{PLANTILLA_CELLNAME_PATH}")
             return
         sel = filedialog.askopenfilename(
             title="Selecciona el Excel con columna 'cellName'",
@@ -826,7 +933,7 @@ class App(tk.Tk):
         except FileNotFoundError as e:
             messagebox.showerror("Archivo faltante", str(e)); return
         except Exception as e:
-            messagebox.showerror("Error al generar XML", str(e)); return
+            messagebox.showerror("Plantilla inválida", str(e)); return
 
         enb = _enb_from_cellname(rows[0]["cellName"])
         default_name = f"{enb}.xml".replace("/", "_").replace("\\", "_")
@@ -840,6 +947,20 @@ class App(tk.Tk):
         with open(out_path, "wb") as f: f.write(xml_bytes)
         messagebox.showinfo("Listo", f"XML generado (solo cellName):\n{out_path}")
 
+# ===================== Util para IpRouting normal =====================
+def find_iprouting_values(df_iprt: Optional[pd.DataFrame], lnBtsId: str, eNBName: str) -> Tuple[Optional[str], Optional[str]]:
+    if df_iprt is None or df_iprt.empty: return (None, None)
+    row = None
+    if "lnBtsId" in df_iprt.columns and lnBtsId:
+        m = df_iprt["lnBtsId"].astype(str).str.strip() == str(lnBtsId).strip()
+        if m.any(): row = df_iprt[m].iloc[0]
+    if row is None and "eNBName" in df_iprt.columns and eNBName:
+        m = df_iprt["eNBName"].astype(str).str.strip() == str(eNBName).strip()
+        if m.any(): row = df_iprt[m].iloc[0]
+    if row is None: row = df_iprt.iloc[0]
+    return (normalize_ip(sval(row, "iprtDest")) or None, normalize_ip(sval(row, "iprtGateway")) or None)
+
+# ===================== Main =====================
 def main():
     app = App()
     app.mainloop()

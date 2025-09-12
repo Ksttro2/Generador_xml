@@ -1,38 +1,38 @@
-   <managedObject class="com.nokia.srbts.mnl:LCELL" distName="MRBTS-4547/MNL-1/MNLENT-1/CELLMAPPING-1/LCELL-101" version="MNL24R3_2413_120" operation="create">
+   <managedObject class="com.nokia.srbts.mnl:LCELL" distName="MRBTS-4486/MNL-1/MNLENT-1/CELLMAPPING-1/LCELL-100" version="MNL24R3_2413_120" operation="create">
       <p name="actAsiDistMimo">false</p>
       <p name="actDynamicSharedSpectrum">false</p>
       <p name="actWcdmaLteSharedSpectrum">false</p>
     </managedObject>
-    <managedObject class="com.nokia.srbts.mnl:CHANNELGROUP" distName="MRBTS-4547/MNL-1/MNLENT-1/CELLMAPPING-1/LCELL-101/CHANNELGROUP-1" version="MNL24R3_2413_120" operation="create"/>
-    <managedObject class="com.nokia.srbts.mnl:CHANNEL" distName="MRBTS-4547/MNL-1/MNLENT-1/CELLMAPPING-1/LCELL-101/CHANNELGROUP-1/CHANNEL-1" version="MNL24R3_2413_120" operation="create">
-      <p name="antlDN">MRBTS-4547/EQM-1/APEQM-1/RMOD-4/ANTL-1</p>
+    <managedObject class="com.nokia.srbts.mnl:CHANNELGROUP" distName="MRBTS-4486/MNL-1/MNLENT-1/CELLMAPPING-1/LCELL-100/CHANNELGROUP-1" version="MNL24R3_2413_120" operation="create"/>
+    <managedObject class="com.nokia.srbts.mnl:CHANNEL" distName="MRBTS-4486/MNL-1/MNLENT-1/CELLMAPPING-1/LCELL-100/CHANNELGROUP-1/CHANNEL-1" version="MNL24R3_2413_120" operation="create">
+      <p name="antlDN">MRBTS-4486/EQM-1/APEQM-1/RMOD-4/ANTL-1</p>
       <p name="direction">TX</p>
     </managedObject>
-    <managedObject class="com.nokia.srbts.mnl:CHANNEL" distName="MRBTS-4547/MNL-1/MNLENT-1/CELLMAPPING-1/LCELL-101/CHANNELGROUP-1/CHANNEL-2" version="MNL24R3_2413_120" operation="create">
-      <p name="antlDN">MRBTS-4547/EQM-1/APEQM-1/RMOD-4/ANTL-1</p>
+    <managedObject class="com.nokia.srbts.mnl:CHANNEL" distName="MRBTS-4486/MNL-1/MNLENT-1/CELLMAPPING-1/LCELL-100/CHANNELGROUP-1/CHANNEL-2" version="MNL24R3_2413_120" operation="create">
+      <p name="antlDN">MRBTS-4486/EQM-1/APEQM-1/RMOD-4/ANTL-1</p>
       <p name="direction">RX</p>
     </managedObject>
-    <managedObject class="com.nokia.srbts.mnl:CHANNEL" distName="MRBTS-4547/MNL-1/MNLENT-1/CELLMAPPING-1/LCELL-101/CHANNELGROUP-1/CHANNEL-3" version="MNL24R3_2413_120" operation="create">
-      <p name="antlDN">MRBTS-4547/EQM-1/APEQM-1/RMOD-4/ANTL-2</p>
+    <managedObject class="com.nokia.srbts.mnl:CHANNEL" distName="MRBTS-4486/MNL-1/MNLENT-1/CELLMAPPING-1/LCELL-100/CHANNELGROUP-1/CHANNEL-3" version="MNL24R3_2413_120" operation="create">
+      <p name="antlDN">MRBTS-4486/EQM-1/APEQM-1/RMOD-4/ANTL-2</p>
       <p name="direction">TX</p>
     </managedObject>
-    <managedObject class="com.nokia.srbts.mnl:CHANNEL" distName="MRBTS-4547/MNL-1/MNLENT-1/CELLMAPPING-1/LCELL-101/CHANNELGROUP-1/CHANNEL-4" version="MNL24R3_2413_120" operation="create">
-      <p name="antlDN">MRBTS-4547/EQM-1/APEQM-1/RMOD-4/ANTL-2</p>
+    <managedObject class="com.nokia.srbts.mnl:CHANNEL" distName="MRBTS-4486/MNL-1/MNLENT-1/CELLMAPPING-1/LCELL-100/CHANNELGROUP-1/CHANNEL-4" version="MNL24R3_2413_120" operation="create">
+      <p name="antlDN">MRBTS-4486/EQM-1/APEQM-1/RMOD-4/ANTL-2</p>
       <p name="direction">RX</p>
     </managedObject>
-    <managedObject class="com.nokia.srbts.mnl:CHANNEL" distName="MRBTS-4547/MNL-1/MNLENT-1/CELLMAPPING-1/LCELL-101/CHANNELGROUP-1/CHANNEL-5" version="MNL24R3_2413_120" operation="create">
-      <p name="antlDN">MRBTS-4547/EQM-1/APEQM-1/RMOD-4/ANTL-3</p>
+    <managedObject class="com.nokia.srbts.mnl:CHANNEL" distName="MRBTS-4486/MNL-1/MNLENT-1/CELLMAPPING-1/LCELL-100/CHANNELGROUP-1/CHANNEL-5" version="MNL24R3_2413_120" operation="create">
+      <p name="antlDN">MRBTS-4486/EQM-1/APEQM-1/RMOD-4/ANTL-3</p>
       <p name="direction">TX</p>
     </managedObject>
-    <managedObject class="com.nokia.srbts.mnl:CHANNEL" distName="MRBTS-4547/MNL-1/MNLENT-1/CELLMAPPING-1/LCELL-101/CHANNELGROUP-1/CHANNEL-6" version="MNL24R3_2413_120" operation="create">
-      <p name="antlDN">MRBTS-4547/EQM-1/APEQM-1/RMOD-4/ANTL-3</p>
+    <managedObject class="com.nokia.srbts.mnl:CHANNEL" distName="MRBTS-4486/MNL-1/MNLENT-1/CELLMAPPING-1/LCELL-100/CHANNELGROUP-1/CHANNEL-6" version="MNL24R3_2413_120" operation="create">
+      <p name="antlDN">MRBTS-4486/EQM-1/APEQM-1/RMOD-4/ANTL-3</p>
       <p name="direction">RX</p>
     </managedObject>
-    <managedObject class="com.nokia.srbts.mnl:CHANNEL" distName="MRBTS-4547/MNL-1/MNLENT-1/CELLMAPPING-1/LCELL-101/CHANNELGROUP-1/CHANNEL-7" version="MNL24R3_2413_120" operation="create">
-      <p name="antlDN">MRBTS-4547/EQM-1/APEQM-1/RMOD-4/ANTL-4</p>
+    <managedObject class="com.nokia.srbts.mnl:CHANNEL" distName="MRBTS-4486/MNL-1/MNLENT-1/CELLMAPPING-1/LCELL-100/CHANNELGROUP-1/CHANNEL-7" version="MNL24R3_2413_120" operation="create">
+      <p name="antlDN">MRBTS-4486/EQM-1/APEQM-1/RMOD-4/ANTL-4</p>
       <p name="direction">TX</p>
     </managedObject>
-    <managedObject class="com.nokia.srbts.mnl:CHANNEL" distName="MRBTS-4547/MNL-1/MNLENT-1/CELLMAPPING-1/LCELL-101/CHANNELGROUP-1/CHANNEL-8" version="MNL24R3_2413_120" operation="create">
-      <p name="antlDN">MRBTS-4547/EQM-1/APEQM-1/RMOD-4/ANTL-4</p>
+    <managedObject class="com.nokia.srbts.mnl:CHANNEL" distName="MRBTS-4486/MNL-1/MNLENT-1/CELLMAPPING-1/LCELL-100/CHANNELGROUP-1/CHANNEL-8" version="MNL24R3_2413_120" operation="create">
+      <p name="antlDN">MRBTS-4486/EQM-1/APEQM-1/RMOD-4/ANTL-4</p>
       <p name="direction">RX</p>
     </managedObject>

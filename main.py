@@ -285,10 +285,13 @@ def set_top_master_and_rate(cmData, master_ip: str, rate_val: str):
         mp = first(it, "./r:p[@name='masterIpAddr']") or ET.SubElement(it, f"{{{NS['r']}}}p", {"name":"masterIpAddr"})
         if master_ip: mp.text = master_ip
     rp = first(topf, "./r:p[@name='syncMessageRate']") or ET.SubElement(topf, f"{{{NS['r']}}}p", {"name":"syncMessageRate"})
-    try:
-        rx = int(str(rate_val).strip()); rp.text = f"RATE_{rx}"
-    except Exception:
-        rp.text = str(rate_val or "RATE_32")
+    rv = str(rate_val).strip()
+    if rv and not rv.upper().startswith("RATE_"):
+        try:
+            rv = f"RATE_{int(rv)}"
+        except Exception:
+            pass
+    rp.text = rv or "RATE_32"
 
 def ensure_top_splane_points_to_ipif3(cmData):
     top = first(cmData, ".//r:managedObject[@class='com.nokia.srbts.mnl:TOP']")
@@ -409,12 +412,7 @@ def _set_or_create_p(elem: ET.Element, name: str, value: str):
         p = ET.SubElement(elem, f"{{{NS['r']}}}p", {"name": name})
     p.text = value
 
-def _norm_decimal(val: Optional[str]) -> Optional[str]:
-    if val is None: return None
-    s = str(val).strip().replace(",", ".")
-    return s if s else None
-
-def _set_if_has(elem: ET.Element, name: str, value: Optional[str]):
+def _set_if_has_literal(elem: ET.Element, name: str, value: Optional[str]):
     if value is None: return
     _set_or_create_p(elem, name, value)
 
@@ -428,18 +426,38 @@ def _enb_from_cellname(cellname: str) -> str:
 
 # -------- Lectores de TXT de sectores y puertos --------
 def _extract_managed_objects_from_text(text: str) -> List[ET.Element]:
-    """Devuelve TODOS los <managedObject>…</managedObject> del texto."""
+    """
+    Devuelve TODOS los <managedObject>…</managedObject> del texto,
+    incluyendo también los self-closing: <managedObject ... />
+    """
     text = text.lstrip("\ufeff")
+    # quitar prolog si viene
     text = re.sub(r"<\?xml[^>]*\?>", "", text, flags=re.I)
-    mos = []
-    for m in re.finditer(r"<managedObject\b.*?</managedObject>", text, flags=re.S | re.I):
+    mos: List[ET.Element] = []
+
+    # (1) Captura bloques con cierre explícito
+    pattern_full = re.compile(r"<managedObject\b.*?</managedObject>", re.S | re.I)
+    # (2) Captura self-closing
+    pattern_self = re.compile(r"<managedObject\b[^>]*?/>", re.S | re.I)
+    # (3) Recorrer en orden de aparición con un OR que preserve el orden
+    pattern_any = re.compile(r"(?:<managedObject\b[^>]*?/>|<managedObject\b.*?</managedObject>)", re.S | re.I)
+
+    for m in pattern_any.finditer(text):
         frag = m.group(0)
         try:
             mo = ET.fromstring(frag)
             _ensure_namespace_recursive(mo)
             mos.append(mo)
         except ET.ParseError:
-            continue
+            # fallback: intentar cerrar manualmente si fue self-closing malformado
+            try:
+                if pattern_self.fullmatch(frag):
+                    frag2 = frag.replace("/>", "></managedObject>")
+                    mo = ET.fromstring(frag2)
+                    _ensure_namespace_recursive(mo)
+                    mos.append(mo)
+            except Exception:
+                continue
     return mos
 
 def load_sector_fragments(sector: str) -> List[ET.Element]:
@@ -453,7 +471,7 @@ def load_sector_fragments(sector: str) -> List[ET.Element]:
     return mos
 
 def load_ports_fragments(sector: str) -> List[ET.Element]:
-    path = Path(__file__).parent / "doc" / f"SCRIP_PUERTOS_{sector}.txt"
+    path = Path(__file__).parent / "doc" / f"SCRIPT_PUERTOS_{sector}.txt"
     if not path.exists():
         return []  # opcional
     txt = path.read_text(encoding="utf-8", errors="ignore")
@@ -468,7 +486,6 @@ def _replace_ids_in_element(elem: ET.Element, lnBtsId: str, lncel_idx: Optional[
     repl_c = f"LNCEL-{lncel_idx}" if lncel_idx else None
 
     for e in elem.iter():
-        # atributos
         for k, v in list(e.attrib.items()):
             if not isinstance(v, str): continue
             nv = pat_mrbts.sub(repl_m, v)
@@ -476,90 +493,185 @@ def _replace_ids_in_element(elem: ET.Element, lnBtsId: str, lncel_idx: Optional[
             if repl_c: nv = pat_lncel.sub(repl_c, nv)
             if nv != v:
                 e.set(k, nv)
-        # texto
         if isinstance(e.text, str):
             t = pat_mrbts.sub(repl_m, e.text)
             t = pat_lnbts.sub(repl_l, t)
             if repl_c: t = pat_lncel.sub(repl_c, t)
             e.text = t
 
+def _lcrid_from_row_or_suffix(cellname: str, row_or_dict: Optional[Dict[str, str]] = None) -> Optional[str]:
+    DEFAULT_LCR_BY_SUFFIX = {"L1": "100", "L2": "101", "L3": "102", "T1": "150", "T2": "151", "T3": "152"}
+    if row_or_dict:
+        for key in ("lcrId", "LCRID", "lcrid"):
+            v = row_or_dict.get(key)
+            if v and str(v).strip():
+                return str(v).strip()
+    m = re.search(r"_(L[123]|T[123])$", str(cellname).strip(), flags=re.I)
+    if m:
+        suf = m.group(1).upper()
+        return DEFAULT_LCR_BY_SUFFIX.get(suf)
+    return None
+
+def _normalize_decimal_dot(val: Optional[str]) -> Optional[str]:
+    if val is None:
+        return None
+    s = str(val).strip()
+    # si parece número con coma, cámbiala por punto
+    if re.fullmatch(r"-?\d+,\d+", s):
+        return s.replace(",", ".")
+    return s
+
 def insert_lncels_and_ports_from_cellnames(cmData: ET.Element, lnBtsId: str, rows: List[Dict[str, str]]):
+    """
+    Inserta SIN borrar nada existente:
+    - Bloques del sector (p.ej., L1.txt)
+    - Bloques de puertos (SCRIPT_PUERTOS_Lx.txt), incluyendo self-closing
+    Ajusta MRBTS/LNBTS/LNCEL y LCELL según Excel.
+    """
     for r in rows:
-        cn = r["cellName"].strip()
+        cn = (r.get("cellName") or "").strip()
+        if not cn:
+            continue
         sec = _sector_from_cellname(cn)
-        if not sec:  # si no hay sufijo L1/L2/… ignorar
+        if not sec:
             continue
-        idx = SECTOR_TO_LNCEL_INDEX.get(sec)
-        if not idx:
+        lncel_idx = SECTOR_TO_LNCEL_INDEX.get(sec)
+        if not lncel_idx:
             continue
+        lcr_id = _lcrid_from_row_or_suffix(cn, r)
 
         # 1) Sector base (L1.txt, T3.txt, etc.)
         for mo in load_sector_fragments(sec):
-            _replace_ids_in_element(mo, lnBtsId, idx)
-            # Ajuste distName si es LNCEL
-            if mo.get("class", "").endswith(":LNCEL") or mo.get("class", "").endswith(":LNCEL_FDD"):
-                mo.set("distName", f"MRBTS-{lnBtsId}/LNBTS-{lnBtsId}/LNCEL-{idx}")
+            _replace_ids_in_element(mo, lnBtsId, lncel_idx)
+
+            # Si es LNCEL, fijar DN, cellName y parámetros con normalización pMax (coma -> punto)
+            is_lncel = (mo.get("class", "").endswith(":LNCEL") or mo.get("class", "").endswith(":LNCEL_FDD"))
+            if is_lncel:
+                mo.set("distName", f"MRBTS-{lnBtsId}/LNBTS-{lnBtsId}/LNCEL-{lncel_idx}")
                 _set_or_create_p(mo, "cellName", cn)
-                # Parámetros opcionales
-                _set_if_has(mo, "phyCellId",      r.get("phyCellId"))
-                _set_if_has(mo, "tac",            r.get("tac"))
-                _set_if_has(mo, "prachFreqOff",   r.get("prachFreqOff"))
-                _set_if_has(mo, "rootSeqIndex",   r.get("rootSeqIndex"))
-                _set_if_has(mo, "prachCS",        r.get("prachCS"))
-                _set_if_has(mo, "prachConfIndex", r.get("prachConfIndex"))
-                _set_if_has(mo, "earfcnDL",       r.get("earfcnDL"))
-                _set_if_has(mo, "pMax",           _norm_decimal(r.get("pMax")))
+                # parámetros opcionales
+                for pname in ("phyCellId","tac","prachFreqOff","rootSeqIndex","prachCS","prachConfIndex","earfcnDL"):
+                    v = r.get(pname)
+                    if v is not None:
+                        _set_or_create_p(mo, pname, str(v))
+                pmax_val = _normalize_decimal_dot(r.get("pMax"))
+                if pmax_val is not None:
+                    _set_or_create_p(mo, "pMax", pmax_val)
+                if lcr_id:
+                    _set_or_create_p(mo, "lcrId", lcr_id)
             else:
-                # en cualquier otro MO, si trae p name=cellName, reemplazar por el cn
+                # Si trae p name=cellName, reemplazar por el cn
                 p_cn = first(mo, "./r:p[@name='cellName']")
                 if p_cn is not None:
                     p_cn.text = cn
             cmData.append(mo)
 
-        # 2) Puertos del sector (SCRIP_PUERTOS_L1.txt, etc.)
+        # 2) Puertos del sector (SCRIPT_PUERTOS_Lx.txt) — incluye LCELL + CHANNELGROUP + CHANNEL-1..8
         for mo in load_ports_fragments(sec):
-            _replace_ids_in_element(mo, lnBtsId, idx)
-            # Actualizar cellName si aparece como parámetro
+            _replace_ids_in_element(mo, lnBtsId, lncel_idx)
+            # Ajustar LCELL-### en distName a lcrId (si existe)
+            if lcr_id:
+                dn = mo.get("distName", "")
+                dn2 = re.sub(r"/LCELL-\d+", f"/LCELL-{lcr_id}", dn)
+                if dn2 != dn:
+                    mo.set("distName", dn2)
+            # Actualizar cellName si aparece
             p_cn = first(mo, "./r:p[@name='cellName']")
             if p_cn is not None:
                 p_cn.text = cn
             cmData.append(mo)
 
+# ===================== NUEVO: Reemplazo dirigido SOLO LNCEL-1 en TXT =====================
+def _actualizar_bloque_lncel1_xml_text(cuerpo: str, cellName: str, LNBTSID: str, lcrId: str) -> str:
+    if re.search(r'<p\s+name="cellName">.*?</p>', cuerpo, re.DOTALL):
+        cuerpo = re.sub(r'(<p\s+name="cellName">).*?(</p>)', rf'\1{cellName}\2', cuerpo, flags=re.DOTALL)
+    else:
+        cuerpo = f'{cuerpo}\n<p name="cellName">{cellName}</p>'
+    if re.search(r'<p\s+name="LNBTSID">.*?</p>', cuerpo, re.DOTALL):
+        cuerpo = re.sub(r'(<p\s+name="LNBTSID">).*?(</p>)', rf'\1{LNBTSID}\2', cuerpo, flags=re.DOTALL)
+    else:
+        cuerpo = f'{cuerpo}\n<p name="LNBTSID">{LNBTSID}</p>'
+    if re.search(r'<p\s+name="lcrId">.*?</p>', cuerpo, re.DOTALL):
+        cuerpo = re.sub(r'(<p\s+name="lcrId">).*?(</p>)', rf'\1{lcrId}\2', cuerpo, flags=re.DOTALL)
+    else:
+        cuerpo = f'{cuerpo}\n<p name="lcrId">{lcrId}</p>'
+    return cuerpo
+
+def _actualizar_contenido_lncel1_en_texto(txt: str, cellName: str, LNBTSID: str, lcrId: str) -> str:
+    pattern_bloque_xml = re.compile(
+        r'(<managedObject\b[^>]*\bdistName="[^"]*LNCEL-1"[^>]*>)(.*?)(</managedObject>)',
+        re.DOTALL | re.IGNORECASE
+    )
+    def _rep_xml(m):
+        start, body, end = m.groups()
+        body = _actualizar_bloque_lncel1_xml_text(body, cellName, LNBTSID, lcrId)
+        return f"{start}{body}{end}"
+    if pattern_bloque_xml.search(txt):
+        return pattern_bloque_xml.sub(_rep_xml, txt, count=1)
+
+    pattern_tx_bloque = re.compile(
+        r'(LNCEL-1.*?)(?=(?:\n[A-Z].*LNCEL-\d)|<managedObject\b|</cmData>|</raml>|\Z)',
+        re.DOTALL | re.IGNORECASE
+    )
+    def _rep_txt(m):
+        bloque = m.group(1)
+        bloque2 = _actualizar_bloque_lncel1_xml_text(bloque, cellName, LNBTSID, lcrId)
+        if bloque2 != bloque:
+            return bloque2
+        def rep_linea(name: str, value: str) -> str:
+            if re.search(rf'(?i)^{name}\s*[:=]\s*.*$', bloque, re.MULTILINE):
+                return re.sub(rf'(?im)^({name}\s*[:=]\s*).*$',
+                              rf'\1{value}', bloque)
+            return bloque + f'\n{name}: {value}'
+        bloque = rep_linea("cellName", cellName)
+        bloque = rep_linea("LNBTSID", LNBTSID)
+        bloque = rep_linea("lcrId", lcrId)
+        return bloque
+    if pattern_tx_bloque.search(txt):
+        return pattern_tx_bloque.sub(_rep_txt, txt, count=1)
+    return txt
+
+def replace_lncel1_in_sector_txt(sector: str, cellName: str, lnBtsId: str, lcrId: str) -> Tuple[bool, str]:
+    sector = sector.strip().upper()
+    path = Path(__file__).parent / "doc" / f"{sector}.txt"
+    if not path.exists():
+        raise FileNotFoundError(f"No se encontró el archivo del sector: {path}")
+    original = path.read_text(encoding="utf-8", errors="ignore")
+    nuevo = _actualizar_contenido_lncel1_en_texto(
+        original,
+        cellName=cellName,
+        LNBTSID=str(lnBtsId).strip(),
+        lcrId=str(lcrId).strip()
+    )
+    if nuevo != original:
+        try:
+            path.with_suffix(path.suffix + ".bak").write_text(original, encoding="utf-8")
+        except Exception:
+            pass
+        path.write_text(nuevo, encoding="utf-8")
+        return True, str(path)
+    return False, str(path)
+
 # ===================== Lector robusto de plantilla (evita "junk after document element") =====================
 def _clean_text_to_single_raml_root(raw: str) -> str:
-    """
-    Devuelve un documento con UN solo root <raml>…</raml>.
-    - Quita BOM y prólogos.
-    - Si <raml …/> está autocerrado, lo abre.
-    - Si falta </raml>, lo agrega tras el último </cmData>.
-    - Ignora restos antes o después del bloque.
-    """
     if not isinstance(raw, str):
         raw = raw.decode("utf-8", "ignore")
-
     s = raw.lstrip("\ufeff")
     s = re.sub(r"<\?xml[^>]*\?>", "", s, flags=re.I)
     s = s.strip()
-
     m_start = re.search(r"<raml\b[^>]*?/?>", s, flags=re.I)
     if not m_start:
         raise ET.ParseError("No se encontró ninguna etiqueta <raml> en la plantilla.")
-
     start_tag = m_start.group(0)
     rest = s[m_start.end():]
-
-    # abrir si estaba autocerrado
     start_tag = re.sub(r"/\s*>$", ">", start_tag)
-
     m_end = re.search(r"</\s*raml\s*>", rest, flags=re.I)
     if m_end:
         core = start_tag + rest[:m_end.end()]
     else:
-        # tratar de cerrar después del último </cmData>
         cm_matches = list(re.finditer(r"</\s*cmData\s*>", rest, flags=re.I))
         end_idx = cm_matches[-1].end() if cm_matches else len(rest)
         core = start_tag + rest[:end_idx] + "</raml>"
-
     return '<?xml version="1.0" encoding="UTF-8"?>\n' + core
 
 def _parse_xml_loose(path: Path) -> ET.ElementTree:
@@ -567,6 +679,62 @@ def _parse_xml_loose(path: Path) -> ET.ElementTree:
     cleaned = _clean_text_to_single_raml_root(txt)
     root = ET.fromstring(cleaned)
     return ET.ElementTree(root)
+
+# ============== Post-procesos requeridos ==============
+def _remove_tgtThreshPrId_eq_2(cmData: ET.Element):
+    for mo in list(_iter_managed_objects(cmData)):
+        for p in list(xp(mo, "./r:p[@name='tgtThreshPrId']")):
+            if (p.text or "").strip() == "2":
+                mo.remove(p)
+
+def _fix_all_pmax_decimal(cmData: ET.Element):
+    for mo in _iter_managed_objects(cmData):
+        for p in xp(mo, "./r:p[@name='pMax']"):
+            if p.text:
+                t = _normalize_decimal_dot(p.text)
+                if t is not None:
+                    p.text = t
+
+def _force_rmod4_prodcode(cmData: ET.Element, lnBtsId: str):
+    """
+    En MRBTS-<id>/EQM-1/APEQM-1/RMOD-4:
+      - Dejar un único <p name="prodCodePlanned">475964A</p>
+      - Eliminar posibles duplicados previos
+    """
+    target_dn = f"MRBTS-{lnBtsId}/EQM-1/APEQM-1/RMOD-4"
+    for mo in _iter_managed_objects(cmData):
+        if mo.get("class") == "com.nokia.srbts.eqm:RMOD" and (mo.get("distName") or "") == target_dn:
+            pcs = xp(mo, "./r:p[@name='prodCodePlanned']")
+            if pcs:
+                # dejar el primero, poner valor nuevo y borrar el resto
+                pcs[0].text = "475964A"
+                for extra in pcs[1:]:
+                    mo.remove(extra)
+            else:
+                ET.SubElement(mo, f"{{{NS['r']}}}p", {"name":"prodCodePlanned"}).text = "475964A"
+
+def _finalize_tree_and_bytes(tree: ET.ElementTree) -> bytes:
+    """
+    - Indentar si está disponible
+    - Serializar
+    - Reemplazar prolog por: <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+    """
+    try:
+        ET.indent(tree, space="  ", level=0)
+    except Exception:
+        pass
+    bio = io.BytesIO()
+    tree.write(bio, encoding="utf-8", xml_declaration=True)
+    data = bio.getvalue().decode("utf-8", errors="ignore")
+    # normalizar encabezado
+    data = re.sub(
+        r"^<\?xml[^>]*\?>",
+        '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>',
+        data,
+        count=1,
+        flags=re.M
+    )
+    return data.encode("utf-8")
 
 # ===================== Excel "solo cellName" =====================
 def _read_cellname_excel(path: Path) -> List[Dict[str, str]]:
@@ -596,19 +764,21 @@ def _read_cellname_excel(path: Path) -> List[Dict[str, str]]:
         item = {"cellName": cn}
         for k in PARAM_COLS_OPT:
             item[k] = get_val(r, k)
+        item["lcrId"] = get_val(r, "lcrId")
         rows.append(item)
     if not rows:
         raise RuntimeError("No hay valores en 'cellName'.")
     return rows
 
 def build_xml_from_cellnames_using_template(rows: List[Dict[str, str]], lnBtsId: str) -> bytes:
-    # Usar plantilla ESPECIAL de solo cellname
+    # Plantilla ESPECIAL solo cellname (no borra otros sectores)
     if not PLANTILLA_CELLNAME_PATH.exists():
         raise FileNotFoundError(f"No encuentro la plantilla: {PLANTILLA_CELLNAME_PATH}")
     if not rows:
         raise RuntimeError("No se recibieron filas 'cellName'.")
 
-    enb = _enb_from_cellname(rows[0]["cellName"])
+    primary_cellname = rows[0]["cellName"]
+    enb = _enb_from_cellname(primary_cellname)
 
     # Parseo tolerante
     try:
@@ -622,28 +792,26 @@ def build_xml_from_cellnames_using_template(rows: List[Dict[str, str]], lnBtsId:
         raise RuntimeError("No se encontró <cmData> en la plantilla.")
 
     # Reemplazos globales
-    replace_all_mrbts_ids_anywhere(cmData, lnBtsId)
+    replace_all_mrbts_ids_anywhere(cmData, lnBtsId)  # MRBTS/LNBTS -> lnBtsId
     set_bts_name(cmData, enb)
     set_param_global(cmData, "enbName", enb, True)
     set_param_global(cmData, "moduleLocation", enb, True)
     ensure_top_splane_points_to_ipif3(cmData)
 
-    # Insertar sectores + puertos desde TXT
+    # Insertar sectores + puertos desde TXT (SIN eliminar nada de otros sectores)
     insert_lncels_and_ports_from_cellnames(cmData, lnBtsId=lnBtsId, rows=rows)
+
+    # Post-procesos requeridos
+    _remove_tgtThreshPrId_eq_2(cmData)
+    _fix_all_pmax_decimal(cmData)
+    _force_rmod4_prodcode(cmData, lnBtsId)
 
     # Actualizar timestamp de header
     header_log = first(cmData, "./r:header/r:log")
     if header_log is not None:
         header_log.set("dateTime", datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ"))
 
-    bio = io.BytesIO()
-    try:
-        ET.indent(tree, space="  ", level=0)
-    except Exception:
-        pass
-    tree.write(bio, encoding="utf-8", xml_declaration=True)
-    bio.seek(0)
-    return bio.read()
+    return _finalize_tree_and_bytes(tree)
 
 # ===================== Flujo original (Interface + IpRouting) =====================
 def build_xml_from_row_using_template(
@@ -656,8 +824,7 @@ def build_xml_from_row_using_template(
     cell_suffix: Optional[str] = None,
     lncels_from_txt: Optional[List[str]] = None,
 ) -> bytes:
-    missing = validate_required(row)
-    if missing:
+    if missing := validate_required(row):
         raise RuntimeError("Faltan campos obligatorios: " + ", ".join(missing))
     if not TEMPLATE_PATH.exists():
         raise FileNotFoundError(f"No encuentro la plantilla: {TEMPLATE_PATH}")
@@ -680,7 +847,6 @@ def build_xml_from_row_using_template(
         raise RuntimeError("No se encontró <cmData> en la plantilla.")
 
     replace_all_mrbts_ids_anywhere(cmData, lnBtsId)
-
     set_bts_name(cmData, enbName)
     set_param_global(cmData, "enbName", enbName, True)
 
@@ -720,6 +886,7 @@ def build_xml_from_row_using_template(
             if iprt_gateway:
                 (first(it, "./r:p[@name='gateway']") or ET.SubElement(it, f"{{{NS['r']}}}p", {"name":"gateway"})).text = normalize_ip(iprt_gateway)
 
+    # Agregar sectores desde TXT si se pidieron (no borrar nada existente)
     if lncels_from_txt:
         for sec in lncels_from_txt:
             idx = SECTOR_TO_LNCEL_INDEX.get(sec.strip().upper())
@@ -729,15 +896,30 @@ def build_xml_from_row_using_template(
                 _set_or_create_p(mo, "cellName", f"{enbName}_{sec.strip().upper()}")
                 cmData.append(mo)
 
+    # Post-procesos requeridos
+    _remove_tgtThreshPrId_eq_2(cmData)
+    _fix_all_pmax_decimal(cmData)
+    _force_rmod4_prodcode(cmData, lnBtsId)
+
+    # Actualizar timestamp de header
     header_log = first(cmData, "./r:header/r:log")
     if header_log is not None:
         header_log.set("dateTime", datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ"))
-    bio = io.BytesIO()
-    try: ET.indent(tree, space="  ", level=0)
-    except Exception: pass
-    tree.write(bio, encoding="utf-8", xml_declaration=True)
-    bio.seek(0)
-    return bio.read()
+
+    return _finalize_tree_and_bytes(tree)
+
+# ===================== Util para IpRouting normal =====================
+def find_iprouting_values(df_iprt: Optional[pd.DataFrame], lnBtsId: str, eNBName: str) -> Tuple[Optional[str], Optional[str]]:
+    if df_iprt is None or df_iprt.empty: return (None, None)
+    row = None
+    if "lnBtsId" in df_iprt.columns and lnBtsId:
+        m = df_iprt["lnBtsId"].astype(str).str.strip() == str(lnBtsId).strip()
+        if m.any(): row = df_iprt[m].iloc[0]
+    if row is None and "eNBName" in df_iprt.columns and eNBName:
+        m = df_iprt["eNBName"].astype(str).str.strip() == str(eNBName).strip()
+        if m.any(): row = df_iprt[m].iloc[0]
+    if row is None: row = df_iprt.iloc[0]
+    return (normalize_ip(sval(row, "iprtDest")) or None, normalize_ip(sval(row, "iprtGateway")) or None)
 
 # ===================== UI =====================
 class App(tk.Tk):
@@ -803,6 +985,14 @@ class App(tk.Tk):
 
         bottom = ttk.Frame(self, padding=10); bottom.pack(fill=tk.X)
         self.hint_lbl = ttk.Label(bottom, text="Listo."); self.hint_lbl.pack(side=tk.LEFT)
+
+        self.btn_replace_lncel1 = ttk.Button(
+            bottom,
+            text="Reemplazar LNCEL-1 en TXT (según sector)",
+            command=self.on_replace_lncel1_in_txt
+        )
+        self.btn_replace_lncel1.pack(side=tk.RIGHT, padx=8)
+
         self.btn_generate = ttk.Button(bottom, text="Generar XML", command=self.on_generate_xml)
         self.btn_generate.pack(side=tk.RIGHT)
 
@@ -935,8 +1125,8 @@ class App(tk.Tk):
         except Exception as e:
             messagebox.showerror("Plantilla inválida", str(e)); return
 
-        enb = _enb_from_cellname(rows[0]["cellName"])
-        default_name = f"{enb}.xml".replace("/", "_").replace("\\", "_")
+        # Guardar con el nombre del primer cellName COMPLETO (incluye _Lx)
+        default_name = f"{rows[0]['cellName']}.xml".replace("/", "_").replace("\\", "_")
         out_path = filedialog.asksaveasfilename(
             title="Guardar XML",
             defaultextension=".xml",
@@ -945,20 +1135,65 @@ class App(tk.Tk):
         )
         if not out_path: return
         with open(out_path, "wb") as f: f.write(xml_bytes)
-        messagebox.showinfo("Listo", f"XML generado (solo cellName):\n{out_path}")
+        messagebox.showinfo("Listo", f"XML generado (solo cellName, sin borrar sectores):\n{out_path}")
 
-# ===================== Util para IpRouting normal =====================
-def find_iprouting_values(df_iprt: Optional[pd.DataFrame], lnBtsId: str, eNBName: str) -> Tuple[Optional[str], Optional[str]]:
-    if df_iprt is None or df_iprt.empty: return (None, None)
-    row = None
-    if "lnBtsId" in df_iprt.columns and lnBtsId:
-        m = df_iprt["lnBtsId"].astype(str).str.strip() == str(lnBtsId).strip()
-        if m.any(): row = df_iprt[m].iloc[0]
-    if row is None and "eNBName" in df_iprt.columns and eNBName:
-        m = df_iprt["eNBName"].astype(str).str.strip() == str(eNBName).strip()
-        if m.any(): row = df_iprt[m].iloc[0]
-    if row is None: row = df_iprt.iloc[0]
-    return (normalize_ip(sval(row, "iprtDest")) or None, normalize_ip(sval(row, "iprtGateway")) or None)
+    def on_replace_lncel1_in_txt(self):
+        """
+        Actualiza SOLO LNCEL-1 del TXT del sector seleccionado (radio),
+        con cellName/lnBtsId/lcrId de la fila seleccionada.
+        """
+        if self.df is None or not self.selected_name:
+            messagebox.showinfo("Info", "Selecciona primero un eNBName en la lista.")
+            return
+
+        rows = self.df[self.df["eNBName"].astype(str) == self.selected_name]
+        if rows.empty:
+            messagebox.showerror("Error", "No se encontró la fila seleccionada.")
+            return
+        row = rows.iloc[0]
+
+        sector = self.sector_var_default.get().strip().upper()
+        if sector not in ("L1", "L2", "L3", "T1", "T2", "T3"):
+            messagebox.showerror("Sector inválido", f"Sector no reconocido: {sector}")
+            return
+
+        lnBtsId = sval(row, "lnBtsId")
+        eNBName = sval(row, "eNBName")
+        cellName_excel = sval(row, "cellName")
+        cellName_final = cellName_excel or (f"{eNBName}_{sector}" if eNBName else "")
+        if not cellName_final:
+            messagebox.showerror("Dato faltante", "No se pudo determinar 'cellName'. Agrega 'cellName' en Excel o define eNBName + sector.")
+            return
+        if not lnBtsId:
+            messagebox.showerror("Dato faltante", "lnBtsId es obligatorio en la fila seleccionada.")
+            return
+
+        lcrId = sval(row, "lcrId") or _lcrid_from_row_or_suffix(cellName_final, {})
+        if not lcrId:
+            messagebox.showerror(
+                "Dato faltante",
+                "No encuentro 'lcrId' ni puedo deducirlo por sufijo. Agrega 'lcrId' en Excel (L1=100, L2=101, L3=102, T1=150, T2=151, T3=152)."
+            )
+            return
+
+        try:
+            changed, p = replace_lncel1_in_sector_txt(
+                sector=sector,
+                cellName=cellName_final,
+                lnBtsId=lnBtsId,
+                lcrId=lcrId
+            )
+        except FileNotFoundError as e:
+            messagebox.showerror("Archivo faltante", str(e))
+            return
+        except Exception as e:
+            messagebox.showerror("Error", f"Ocurrió un error al reemplazar LNCEL-1: {e}")
+            return
+
+        if changed:
+            messagebox.showinfo("Listo", f"Se actualizó SOLO el bloque LNCEL-1 en:\n{p}")
+        else:
+            messagebox.showinfo("Sin cambios", f"No se detectó bloque LNCEL-1 para actualizar en:\n{p}")
 
 # ===================== Main =====================
 def main():

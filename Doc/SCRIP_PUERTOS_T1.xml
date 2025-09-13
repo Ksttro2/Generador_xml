@@ -36,7 +36,7 @@
       <p name="antlDN">MRBTS-4486/EQM-1/APEQM-1/RMOD-4/ANTL-4</p>
       <p name="direction">RX</p>
     </managedObject>
-    <managedObject class="com.nokia.srbts.mnl:LCELL" distName="MRBTS-4486/MNL-1/MNLENT-1/CELLMAPPING-1/LCELL-151" version="MNL24R3_2413_120" operation="create">
+    <managedObject class="com.nokia.srbts.mnl:LCELL" distName="MRBTS-4486/MNL-1/MNLENT-1/CELLMAPPING-1/LCELL-150" version="MNL24R3_2413_120" operation="create">
       <p name="actAsiDistMimo">false</p>
       <p name="actDynamicSharedSpectrum">false</p>
       <p name="actWcdmaLteSharedSpectrum">false</p>

@@ -14,7 +14,7 @@ import xml.etree.ElementTree as ET
 ############################################################
 # Configuración
 ############################################################
-APP_TITLE = "XML Merger OSC — Base + L1/L2/L3/T1/T2/T3/S1/S2/S3"
+APP_TITLE = "XML Merger OSC — Base + Sectores (L1/L2/L3)"
 DEFAULT_DOC_DIR = Path(__file__).parent / "Doc"
 
 # Namespace RAML
@@ -27,12 +27,6 @@ SECTOR_FILES = {
     "L1": "L1.xml",
     "L2": "L2.xml",
     "L3": "L3.xml",
-    "T1": "T1.xml",
-    "T2": "T2.xml",
-    "T3": "T3.xml",
-    "S1": "S1.xml",
-    "S2": "S2.xml",
-    "S3": "S3.xml",
 }
 
 # Mapeos de parámetros a actualizar en sectores (earfcnDL excluido)
@@ -94,7 +88,6 @@ class XmlExcelMerger:
         self.df = self._load_excel()
         self._validate_df()
 
-    # ---------- Excel ----------
     def _load_excel(self) -> pd.DataFrame:
         try:
             df = pd.read_excel(self.excel_path)
@@ -111,15 +104,12 @@ class XmlExcelMerger:
                 f"Faltan columnas en el Excel: {missing}. Debe existir al menos 'name' y 'cellName'."
             )
 
-    # ---------- Cargar XML base (parseo estándar) ----------
     def _load_xml(self, path: Path) -> ET.ElementTree:
         text = path.read_text(encoding='utf-8', errors='ignore').replace('\ufeff', '')
         return ET.ElementTree(ET.fromstring(text))
 
-    # ---------- Reemplazos Base ----------
     def apply_base_replacements(self, tree: ET.ElementTree) -> None:
         root = tree.getroot()
-        # Tomar la primera fila con 'name'
         row_name = None
         for _, r in self.df.iterrows():
             n = str(r.get('name', '')).strip()
@@ -138,18 +128,15 @@ class XmlExcelMerger:
             for p in _findall(root, ".//r:p[@name='" + pname + "']"):
                 p.text = val
 
-        # Reemplazo parcial en cellName: conserva sufijo _M1/_M2/_M3/_L1/_L2/_L3
         for p in _findall(root, ".//r:p[@name='cellName']"):
             if p.text:
-                m = re.match(r"^(.*?)(_[MLRTS]\d)\s*$", p.text.strip(), flags=re.I)
+                m = re.match(r"^(.*?)(_[ML]\d)\s*$", p.text.strip(), flags=re.I)
                 if m:
                     suffix = m.group(2)
                     p.text = f"{name_value}{suffix}"
 
-        # Reemplazo 473042A -> 475964A en atributos y texto
         self._replace_anywhere(root, "473042A", "475964A")
 
-        # Reescritura MRBTS/LNBTS si LNBTSID está en Excel
         lnbts_id = str(row_name.get('LNBTSID', '')).strip()
         if lnbts_id:
             self._rewrite_mrbts_lnbts_ids(root, lnbts_id)
@@ -179,7 +166,6 @@ class XmlExcelMerger:
             if e.text and pat.search(e.text):
                 e.text = pat.sub(lambda m: f"{m.group(1)}-{lnbts_id}", e.text)
 
-    # ---------- Sectores (solo L1/L2/L3) ----------
     def build_sector_trees(self) -> List[ET.ElementTree]:
         sector_rows = []
         for _, r in self.df.iterrows():
@@ -190,13 +176,13 @@ class XmlExcelMerger:
             return []
 
         wanted_labels: Set[str] = set()
-        by_label_rows: Dict[str, List[pd.Series]] = {"L1": [], "L2": [], "L3": [], "T1": [], "T2": [], "T3": [], "S1": [], "S2": [], "S3": []}
+        by_label_rows: Dict[str, List[pd.Series]] = {"L1": [], "L2": [], "L3": []}
         for r in sector_rows:
             cn = str(r.get('cellName', '')).strip()
-            m = re.search(r"_([Ll][123]|[Tt][123]|[Ss][123])\b", cn)
+            m = re.search(r"_([Ll][123])\b", cn)
             if not m:
                 continue
-            label = m.group(1).upper()  # L1/L2/L3/T1/T2/T3
+            label = m.group(1).upper()
             wanted_labels.add(label)
             by_label_rows[label].append(r)
 
@@ -208,7 +194,6 @@ class XmlExcelMerger:
             fpath = self.doc_dir / file_name
             if not fpath.exists():
                 raise FileNotFoundError(f"No encontré el XML de sector {label} en: {fpath}")
-            # Carga tolerante para sectores
             t = load_xml_tolerant(fpath)
             r0 = by_label_rows[label][0]
             self._fill_sector_params(t.getroot(), r0)
@@ -229,7 +214,6 @@ class XmlExcelMerger:
                 for p in _findall(root, f".//r:p[@name='{col}']"):
                     p.text = sval
 
-    # ---------- Unión de árboles ----------
     def merge_all(self, base_tree: ET.ElementTree, sector_trees: List[ET.ElementTree]) -> ET.ElementTree:
         base_root = base_tree.getroot()
         cmdata = _find(base_root, ".//r:cmData")
@@ -243,14 +227,11 @@ class XmlExcelMerger:
                 cmdata.append(mo)
         return base_tree
 
-    # ---------- Ejecución ----------
     def run(self) -> Path:
         base_tree = self._load_xml(self.base_xml_path)
         self.apply_base_replacements(base_tree)
         sector_trees = self.build_sector_trees()
         merged = self.merge_all(base_tree, sector_trees)
-        # Si integra T (o en general), convertir 2_carrierOperation -> 3_carrierOperation
-        self._replace_anywhere(merged.getroot(), "2_carrierOperation", "3_carrierOperation")
         self.output_dir.mkdir(parents=True, exist_ok=True)
         ts = datetime.now().strftime('%Y%m%d_%H%M%S')
         out_path = self.output_dir / f"merged_{ts}.xml"
@@ -287,7 +268,7 @@ class App(tk.Tk):
         ttk.Entry(frm, textvariable=self.var_excel, width=80).grid(row=3, column=0, sticky='we', padx=(0,8))
         ttk.Button(frm, text="Elegir...", command=self._choose_excel).grid(row=3, column=1)
 
-        ttk.Label(frm, text="Carpeta Doc con sectores (L1/L2/L3/T1/T2/T3/S1/S2/S3):").grid(row=4, column=0, sticky='w', pady=(12,0))
+        ttk.Label(frm, text="Carpeta Doc con sectores (L1/L2/L3):").grid(row=4, column=0, sticky='w', pady=(12,0))
         ttk.Entry(frm, textvariable=self.var_doc, width=80).grid(row=5, column=0, sticky='we', padx=(0,8))
         ttk.Button(frm, text="Cambiar...", command=self._choose_doc).grid(row=5, column=1)
 

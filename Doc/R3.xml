@@ -1,10 +1,10 @@
- <managedObject class="NOKLTE:LNCEL" distName="MRBTS-4486/LNBTS-4486/LNCEL-1" version="xL24R3_2413_110" operation="create">
+    <managedObject class="NOKLTE:LNCEL" distName="MRBTS-4486/LNBTS-4486/LNCEL-103" version="xL24R3_2413_110" operation="create">
       <p name="a1TimeToTriggerDeactInterMeas">640ms</p>
       <p name="a2RedirectQci1">disabled</p>
       <p name="a2TimeToTriggerActGERANMeas">0ms</p>
       <p name="a2TimeToTriggerActInterFreqMeas">640ms</p>
       <p name="a2TimeToTriggerActWcdmaMeas">320ms</p>
-      <p name="a2TimeToTriggerRedirect">1280ms</p>
+      <p name="a2TimeToTriggerRedirect">2560ms</p>
       <p name="a3Offset">12</p>
       <p name="a3ReportAmount">infinity</p>
       <p name="a3ReportInterval">640ms</p>
@@ -14,15 +14,14 @@
       <p name="a5ReportInterval">240ms</p>
       <p name="a5TimeToTrigger">100ms</p>
       <p name="a5TriggerQuantityIntraFreqHO">RSRP</p>
-      <p name="act3fdd3tddRestrict">true</p>
       <p name="actAcHpsLimits">false</p>
       <p name="actAir2Ground">false</p>
       <p name="actAmle">false</p>
       <p name="actAmleServCellFilter">false</p>
-      <p name="actAntPortMap">false</p>
+      <p name="actAntPortMap">true</p>
       <p name="actB1ReturnTo5GSA">false</p>
       <p name="actCaArchEnhImp">off</p>
-      <p name="actCaBlocking">true</p>
+      <p name="actCaBlocking">false</p>
       <p name="actCaScellSchedWeightFactor">false</p>
       <p name="actCarelCounters">true</p>
       <p name="actCsiRsSubFNonTM9Sch">false</p>
@@ -60,7 +59,7 @@
       <p name="actLBSpidUeSel">false</p>
       <p name="actLdPdcch">true</p>
       <p name="actMaxNumUeDlNonGbr">0</p>
-      <p name="actMcsUpgrade">SingleOrDoubleMcsIndexUpgrade</p>
+      <p name="actMcsUpgrade">Disabled</p>
       <p name="actMicroDtx">true</p>
       <p name="actMicroDtxDrxOptPatterns">false</p>
       <p name="actModulationSchemeDl">256QAM</p>
@@ -121,14 +120,15 @@
       <p name="addSpectrEmi">1</p>
       <p name="administrativeState">unlocked</p>
       <p name="allowPbIndexZero">false</p>
-      <p name="allowTrafficConcentration">true</p>
+      <p name="allowTrafficConcentration">false</p>
       <p name="amRlcSnFieldLengthDl">10bit</p>
       <p name="amleMaxNumHo">10</p>
       <p name="amlePeriodLoadExchange">10000ms</p>
+      <p name="applyFeicicFunctionality">true</p>
       <p name="assignedVoLteQualProfile">0</p>
       <p name="caPoolId">1</p>
       <p name="cellIndOffServ">0dB</p>
-      <p name="cellName">CAL.Rb Nueva Floresta_L1</p>
+      <p name="cellName">NEI.Jose Carbonell_R3</p>
       <p name="cellPwrRedForMBMS">0</p>
       <p name="cellResourceScellMode">NoScellDefaultGroupUsage</p>
       <p name="cellResourceSharingMode">none</p>
@@ -148,7 +148,7 @@
       <p name="dl256QamDeactChQualThr">13</p>
       <p name="dl256QamReactChQualThr">22</p>
       <p name="dlCaCqiWindow">50</p>
-      <p name="dlCaMinPcellCqi">0</p>
+      <p name="dlCaMinPcellCqi">6</p>
       <p name="dlCaMinPcellCqiQci1">0</p>
       <p name="dlCellPwrRed">0</p>
       <p name="dlInterferenceEnable">false</p>
@@ -172,6 +172,8 @@
       <p name="eIcicCioAdaptAlgo">adaptive</p>
       <p name="eIcicCreDelta">2</p>
       <p name="eIcicMaxCre">10</p>
+      <p name="eIcicMaxMutePattern">mp4</p>
+      <p name="eIcicMaxNumPartners">10</p>
       <p name="eIcicMp0DelayT">10</p>
       <p name="eIcicPartnerCacAbsTarget">10</p>
       <p name="eIcicPartnerCacTarget">20</p>
@@ -189,8 +191,8 @@
       <p name="enableCovHo">true</p>
       <p name="enableLowAgg">true</p>
       <p name="enablePcPdcch">true</p>
-      <p name="expectedCellSize">5km</p>
-      <p name="fUlLAAtbTrigThr">-2</p>
+      <p name="expectedCellSize">2.1km</p>
+      <p name="fUlLAAtbTrigThr">-5</p>
       <p name="filterCoeff">fc4</p>
       <p name="filterCoefficientCSFBCpichEcn0">fc4</p>
       <p name="filterCoefficientCSFBCpichRscp">fc4</p>
@@ -201,7 +203,7 @@
       <p name="filterCoefficientRSSI">fc2</p>
       <p name="gbrCongHandling">none</p>
       <p name="grpAssigPUSCH">0</p>
-      <p name="harqMaxMsg3">5</p>
+      <p name="harqMaxMsg3">7</p>
       <p name="harqMaxTrDl">5</p>
       <p name="harqMaxTrSignalingDl">8</p>
       <p name="harqMaxTrUlTtiBundling">12</p>
@@ -217,24 +219,15 @@
       <p name="hysThreshold4">0</p>
       <p name="iFLBA4ActLim">50</p>
       <p name="iFServiceBasedHoRetryTimer">60</p>
-      <p name="idleLBCapThresh">50</p>
+      <p name="idleLBCapThresh">70</p>
       <p name="idleLBCapThreshCaUe">100</p>
-      <p name="idleLBCelResWeight">30</p>
-      <p name="idleLBCelResWeight2CC">100</p>
-      <p name="idleLBCelResWeight3CC">100</p>
-      <p name="idleLBCelResWeight4CC">100</p>
-      <p name="idleLBCelResWeight5CC">100</p>
-      <p name="idleLBCellReSelPrio2CC">30</p>
-      <p name="idleLBCellReSelPrio3CC">30</p>
-      <p name="idleLBCellReSelPrio4CC">30</p>
-      <p name="idleLBCellReSelPrio5CC">30</p>
+      <p name="idleLBCelResWeight">20</p>
       <p name="idleLBPercCaUe">0</p>
       <p name="idleLBPercUeTM9">0</p>
       <p name="idleLBPercentageOfUes">80</p>
       <p name="ilReacTimerUl">0</p>
-      <p name="inactivityTimer">5</p>
+      <p name="inactivityTimer">10</p>
       <p name="inactivityTimerMult">2</p>
-      <p name="inactivityTimerPubSafety">600</p>
       <p name="inactivityTimerQci5Sign">10</p>
       <p name="iniDl256QamChQualEst">1s</p>
       <p name="iniMcsDl">8</p>
@@ -242,7 +235,7 @@
       <p name="iniPrbsUl">4</p>
       <p name="iniUl256QamChQualEst">1s</p>
       <p name="lbLoadFilCoeff">4</p>
-      <p name="lcrId">100</p>
+      <p name="lcrId">2</p>
       <p name="longPeriodScellChEst">2000</p>
       <p name="lowerMarginCio">-10</p>
       <p name="lteNrDssMode">none</p>
@@ -256,10 +249,10 @@
       <p name="maxGbrTrafficLimit">75</p>
       <p name="maxNbrTrafficLimit">90</p>
       <p name="maxNumCaUeScell">400</p>
-      <p name="maxNumScells">2</p>
+      <p name="maxNumScells">4</p>
       <p name="maxNumUeProactiveUl">10</p>
       <p name="maxNumUeProactiveUlNonTxSkip">10</p>
-      <p name="maxNumVoLteProactUlGrantsPerTti">8</p>
+      <p name="maxNumVoLteProactUlGrantsPerTti">7</p>
       <p name="maxPdcchAgg">8</p>
       <p name="maxPdcchAggHighLoad">16</p>
       <p name="maxPeriodicCqiIncrease">15</p>
@@ -267,8 +260,8 @@
       <p name="maxPrbsPerNbrUe">30</p>
       <p name="maxTcpUlPowerBoostUEs">5</p>
       <p name="mbrSelector">ueCapability</p>
-      <p name="mdtxAggressiveness">8</p>
-      <p name="mdtxPdcchSymb">3</p>
+      <p name="mdtxAggressiveness">12</p>
+      <p name="mdtxPdcchSymb">1</p>
       <p name="measQuantityCSFBUtra">cpichRSCP</p>
       <p name="measQuantityUtra">cpichEcN0</p>
       <p name="minBitrateDl">30</p>
@@ -284,13 +277,12 @@
       <p name="multLoadMeasRrm">2</p>
       <p name="multLoadMeasRrmEicic">2</p>
       <p name="n310Qci1">n8</p>
-      <p name="nOverbookingRac">3</p>
       <p name="nbIoTMode">disabled</p>
       <p name="nbrCongHandling">true</p>
       <p name="offsetFreqIntra">0dB</p>
       <p name="p0NomPucch">-100</p>
       <p name="p0NomPusch">-80</p>
-      <p name="pMax">423</p>
+      <p name="pMax">460</p>
       <p name="pagingNb">quarterT</p>
       <p name="pdcchAggDefUe">4</p>
       <p name="pdcchAggMsg4">8</p>
@@ -308,7 +300,7 @@
       <p name="perDl256QamChQualEst">15s</p>
       <p name="perUl256QamChQualEst">5s</p>
       <p name="periodicCqiFeedbackType">wideband</p>
-      <p name="phyCellId">28</p>
+      <p name="phyCellId">17</p>
       <p name="prachDetThresScaling">100</p>
       <p name="preventCellActivation">false</p>
       <p name="prsPowerBoost">0</p>
@@ -324,13 +316,13 @@
       <p name="raPreGrASize">32</p>
       <p name="raRespWinSize">10</p>
       <p name="raSmallMcsUl">5</p>
-      <p name="raSmallVolUl">56 bits</p>
+      <p name="raSmallVolUl">144 bits</p>
       <p name="rcAmbrMgnDl">103</p>
       <p name="rcAmbrMgnUl">102</p>
       <p name="rcEnableDl">false</p>
       <p name="rcEnableUl">false</p>
       <p name="redBwEnDl">false</p>
-      <p name="redBwMaxRbDl">75</p>
+      <p name="redBwMaxRbDl">50</p>
       <p name="redBwRpaEnUl">false</p>
       <p name="reqMaxCCsDlOffset">0</p>
       <p name="rttCellIdInfo">0</p>
@@ -364,23 +356,22 @@
       <p name="taMaxOffset">52</p>
       <p name="taTimer">10240</p>
       <p name="taTimerMargin">2000</p>
-      <p name="tac">31496</p>
+      <p name="tac">22201</p>
       <p name="targetSelMethod">SIB_based</p>
-      <p name="tgtThreshPrId">2</p>
       <p name="threshold1">70</p>
-      <p name="threshold2GERAN">22</p>
-      <p name="threshold2GERANQci1">22</p>
-      <p name="threshold2InterFreq">28</p>
-      <p name="threshold2InterFreqQci1">28</p>
+      <p name="threshold2GERAN">0</p>
+      <p name="threshold2GERANQci1">0</p>
+      <p name="threshold2InterFreq">24</p>
+      <p name="threshold2InterFreqQci1">35</p>
       <p name="threshold2Wcdma">22</p>
-      <p name="threshold2WcdmaQci1">22</p>
-      <p name="threshold2a">30</p>
-      <p name="threshold2aQci1">30</p>
-      <p name="threshold3">36</p>
+      <p name="threshold2WcdmaQci1">27</p>
+      <p name="threshold2a">26</p>
+      <p name="threshold2aQci1">38</p>
+      <p name="threshold3">34</p>
       <p name="threshold3RsrqIntraFreq">-29</p>
       <p name="threshold3a">40</p>
       <p name="threshold3aRsrqIntraFreq">-25</p>
-      <p name="threshold4">18</p>
+      <p name="threshold4">16</p>
       <p name="timeToTriggerSfHigh">0.5</p>
       <p name="timeToTriggerSfMedium">0.5</p>
       <p name="tmpActFeat1">0</p>
@@ -430,6 +421,21 @@
       <p name="voLteProactUlGrantPeriodRegTx">10</p>
       <p name="voLteProactUlGrantPeriodTtib">10</p>
       <p name="voLteProactUlGrantPeriodTtibTxSkip">100</p>
+      <list name="arpBasedPara">
+        <item>
+          <p name="arpPrioLev">1</p>
+          <p name="nbrUlDlSF">10</p>
+          <p name="schedulingWeightSF">10</p>
+        </item>
+      </list>
+      <list name="c2KTimers">
+        <item>
+          <p name="tC2KMeasReport">1000</p>
+          <p name="tC2kRelocExec">7000</p>
+          <p name="tC2KRelocPrep">5000</p>
+          <p name="tULHOPrepTransfer">1000</p>
+        </item>
+      </list>
       <list name="dFListPucch">
         <item>
           <p name="dFpucchF1">0</p>
@@ -437,6 +443,13 @@
           <p name="dFpucchF2">0</p>
           <p name="dFpucchF2a">0</p>
           <p name="dFpucchF2b">0</p>
+        </item>
+      </list>
+      <list name="dlIshConfig">
+        <item>
+          <p name="actDlIsh">false</p>
+          <p name="amountBlankedRes">0</p>
+          <p name="ishPrId">0</p>
         </item>
       </list>
       <list name="dlPwBackoffStructure">
@@ -500,10 +513,10 @@
       </list>
       <list name="eutranAccessPointPosition">
         <item>
-          <p name="altitude">66</p>
+          <p name="altitude">40</p>
           <p name="confidence">100</p>
-          <p name="degreesOfLatitude">663391</p>
-          <p name="degreesOfLongitude">-3624409</p>
+          <p name="degreesOfLatitude">529265</p>
+          <p name="degreesOfLongitude">-3571969</p>
           <p name="directionOfAltitude">height</p>
           <p name="latitudeSign">north</p>
           <p name="orientationOfMajorAxis">0</p>
@@ -512,34 +525,33 @@
           <p name="uncertaintySemiMinor">0</p>
         </item>
       </list>
+      <list name="hrpdTimers">
+        <item>
+          <p name="tC2KRelocOverallHrpd">7000</p>
+          <p name="tC2KRelocPrepHrpd">5000</p>
+          <p name="tUlHoPrepTransferHrpd">1000</p>
+        </item>
+      </list>
       <list name="iFLBLoadThresholds">
         <item>
           <p name="iFLBBearCheckTimer">12</p>
-          <p name="iFLBHighLoadGBRDL">95</p>
-          <p name="iFLBHighLoadNonGBRDL">95</p>
-          <p name="iFLBHighLoadPdcch">95</p>
+          <p name="iFLBHighLoadGBRDL">80</p>
+          <p name="iFLBHighLoadNonGBRDL">80</p>
+          <p name="iFLBHighLoadPdcch">80</p>
           <p name="iFLBRetryTimer">120</p>
           <p name="maxNumAmleNeigh">16</p>
         </item>
       </list>
       <list name="intraFreqLbLoadThresholds">
         <item>
-          <p name="highLoadGbrDl">95</p>
-          <p name="highLoadNonGbrDl">95</p>
-          <p name="highLoadPdcch">95</p>
+          <p name="highLoadGbrDl">80</p>
+          <p name="highLoadNonGbrDl">80</p>
+          <p name="highLoadPdcch">80</p>
           <p name="hysteresisLoadDlGbr">2</p>
           <p name="hysteresisLoadDlNonGbr">2</p>
-          <p name="hysteresisLoadPdcch">2</p>
+          <p name="hysteresisLoadPdcch">12</p>
           <p name="loadBalancingProfile">medium</p>
           <p name="maxLbPartners">16</p>
-        </item>
-      </list>
-      <list name="loadBasedBlockThreshold">
-        <item>
-          <p name="blockNumRrcConn">90</p>
-          <p name="blockThresholdGbrDl">80</p>
-          <p name="blockThresholdNonGbrDl">95</p>
-          <p name="blockThresholdPdcch">80</p>
         </item>
       </list>
       <list name="loadSettings">
@@ -547,9 +559,9 @@
           <p name="cellCapClass">100</p>
           <p name="mlbEicicOperMode">allUes</p>
           <p name="nomNumPrbNonGbr">0.1</p>
-          <p name="targetLoadGbrDl">95</p>
-          <p name="targetLoadNonGbrDl">95</p>
-          <p name="targetLoadPdcch">95</p>
+          <p name="targetLoadGbrDl">80</p>
+          <p name="targetLoadNonGbrDl">80</p>
+          <p name="targetLoadPdcch">80</p>
           <p name="ulCacIgnore">false</p>
           <p name="ulCacSelection">ulReflectDlCac</p>
           <p name="ulStaticCac">100</p>
@@ -561,7 +573,7 @@
           <p name="enableVoLteUePcellSwap">UesWithoutVoLte</p>
           <p name="numCaUeThreshold">40</p>
           <p name="pcellSwapMaxHoRate">5</p>
-          <p name="pFreqPrio">2</p>
+          <p name="pFreqPrio">4</p>
           <p name="puschLoadHysteresis">10</p>
           <p name="puschLoadIndexThr">10</p>
           <p name="scellChQualThreshold">8</p>
@@ -589,6 +601,17 @@
           <p name="qci1UlTargetBler">2</p>
         </item>
       </list>
+      <list name="qci1eVTTConfig">
+        <item>
+          <p name="qci1DlTargetBler">100</p>
+          <p name="qci1HarqMaxTrDl">5</p>
+          <p name="qci1HarqMaxTrUl">5</p>
+          <p name="qci1ReconStopTimer">10</p>
+          <p name="qci1ThroughputFactorDl">16</p>
+          <p name="qci1ThroughputFactorUl">16</p>
+          <p name="qci1UlTargetBler">10</p>
+        </item>
+      </list>
       <list name="rbrConfig">
         <item>
           <p name="rbrCellPrbUsage">true</p>
@@ -605,7 +628,7 @@
       </list>
       <list name="redBwRbUlConfig">
         <item>
-          <p name="redBwMaxRbUl">75</p>
+          <p name="redBwMaxRbUl">50</p>
           <p name="redBwMinRbUl">1</p>
         </item>
       </list>
@@ -614,8 +637,8 @@
           <p name="a1ReportInterval">640ms</p>
           <p name="a2TimeToTriggerMobRsrq">480ms</p>
           <p name="hysThreshold2MobRsrq">0</p>
-          <p name="threshold2aRsrq">8</p>
-          <p name="threshold2MobRsrq">4</p>
+          <p name="threshold2aRsrq">14</p>
+          <p name="threshold2MobRsrq">12</p>
         </item>
       </list>
       <list name="tcpServiceDiffConfig">
@@ -667,66 +690,28 @@
         </item>
       </list>
     </managedObject>
-    <managedObject class="NOKLTE:AMLEPR" distName="MRBTS-4486/LNBTS-4486/LNCEL-1/AMLEPR-0" version="xL24R3_2413_110" operation="create">
+    <managedObject class="NOKLTE:AMLEPR" distName="MRBTS-4486/LNBTS-4486/LNCEL-103/AMLEPR-0" version="xL24R3_2413_110" operation="create">
       <p name="cacHeadroom">0</p>
-      <p name="deltaCac">15</p>
-      <p name="maxCacThreshold">30</p>
+      <p name="deltaCac">5</p>
+      <p name="maxCacThreshold">50</p>
+      <p name="targetCarrierFreq">3075</p>
+    </managedObject>
+    <managedObject class="NOKLTE:AMLEPR" distName="MRBTS-4486/LNBTS-4486/LNCEL-103/AMLEPR-1" version="xL24R3_2413_110" operation="create">
+      <p name="cacHeadroom">0</p>
+      <p name="deltaCac">5</p>
+      <p name="maxCacThreshold">50</p>
       <p name="targetCarrierFreq">3246</p>
     </managedObject>
-    <managedObject class="NOKLTE:AMLEPR" distName="MRBTS-4486/LNBTS-4486/LNCEL-1/AMLEPR-1" version="xL24R3_2413_110" operation="create">
+    <managedObject class="NOKLTE:AMLEPR" distName="MRBTS-4486/LNBTS-4486/LNCEL-103/AMLEPR-2" version="xL24R3_2413_110" operation="create">
       <p name="cacHeadroom">0</p>
-      <p name="deltaCac">30</p>
-      <p name="maxCacThreshold">7</p>
+      <p name="deltaCac">5</p>
+      <p name="maxCacThreshold">50</p>
       <p name="targetCarrierFreq">675</p>
     </managedObject>
-    <managedObject class="NOKLTE:AMLEPR" distName="MRBTS-4486/LNBTS-4486/LNCEL-1/AMLEPR-4" version="xL24R3_2413_110" operation="create">
-      <p name="cacHeadroom">0</p>
-      <p name="deltaCac">30</p>
-      <p name="maxCacThreshold">7</p>
-      <p name="targetCarrierFreq">9560</p>
-    </managedObject>
-    <managedObject class="NOKLTE:BBPOOLALLOC" distName="MRBTS-4486/LNBTS-4486/LNCEL-1/BBPOOLALLOC-0" version="xL24R3_2413_110" operation="create">
+    <managedObject class="NOKLTE:BBPOOLALLOC" distName="MRBTS-4486/LNBTS-4486/LNCEL-103/BBPOOLALLOC-0" version="xL24R3_2413_110" operation="create">
       <p name="bbPoolAllocMode">automatic</p>
     </managedObject>
-    <managedObject class="NOKLTE:CAPR" distName="MRBTS-4486/LNBTS-4486/LNCEL-1/CAPR-0" version="xL24R3_2413_110" operation="create">
-      <p name="a3Offset">-6</p>
-      <p name="a3TimeToTrigger">ms320</p>
-      <p name="a3TriggerQuantity">RSRP</p>
-      <p name="a6Offset">6</p>
-      <p name="a6ReportInterval">640ms</p>
-      <p name="a6TimeToTrigger">320ms</p>
-      <p name="earfcnDL">2434</p>
-      <p name="enableA3Event">true</p>
-      <p name="enableA6Event">true</p>
-      <p name="enableFreqPrioSwap">enabled</p>
-      <p name="hysA3Offset">2</p>
-      <p name="hysA6Offset">0</p>
-      <p name="maxNumScellSwaps">0</p>
-      <p name="sFreqPrio">5</p>
-      <p name="scellMeasThreshRsrp">-110</p>
-      <p name="scellMeasThreshRsrq">-120</p>
-      <p name="scellPdcchOlLa">disabled</p>
-    </managedObject>
-    <managedObject class="NOKLTE:CAPR" distName="MRBTS-4486/LNBTS-4486/LNCEL-1/CAPR-1" version="xL24R3_2413_110" operation="create">
-      <p name="a3Offset">-6</p>
-      <p name="a3TimeToTrigger">ms320</p>
-      <p name="a3TriggerQuantity">RSRP</p>
-      <p name="a6Offset">6</p>
-      <p name="a6ReportInterval">640ms</p>
-      <p name="a6TimeToTrigger">320ms</p>
-      <p name="earfcnDL">3246</p>
-      <p name="enableA3Event">true</p>
-      <p name="enableA6Event">true</p>
-      <p name="enableFreqPrioSwap">enabled</p>
-      <p name="hysA3Offset">2</p>
-      <p name="hysA6Offset">0</p>
-      <p name="maxNumScellSwaps">0</p>
-      <p name="sFreqPrio">1</p>
-      <p name="scellMeasThreshRsrp">-110</p>
-      <p name="scellMeasThreshRsrq">-120</p>
-      <p name="scellPdcchOlLa">disabled</p>
-    </managedObject>
-    <managedObject class="NOKLTE:CAPR" distName="MRBTS-4486/LNBTS-4486/LNCEL-1/CAPR-3" version="xL24R3_2413_110" operation="create">
+    <managedObject class="NOKLTE:CAPR" distName="MRBTS-4486/LNBTS-4486/LNCEL-103/CAPR-2" version="xL24R3_2413_110" operation="create">
       <p name="a3Offset">-6</p>
       <p name="a3TimeToTrigger">ms320</p>
       <p name="a3TriggerQuantity">RSRP</p>
@@ -736,7 +721,7 @@
       <p name="earfcnDL">675</p>
       <p name="enableA3Event">true</p>
       <p name="enableA6Event">true</p>
-      <p name="enableFreqPrioSwap">enabled</p>
+      <p name="enableFreqPrioSwap">disabled</p>
       <p name="hysA3Offset">2</p>
       <p name="hysA6Offset">0</p>
       <p name="maxNumScellSwaps">0</p>
@@ -745,77 +730,85 @@
       <p name="scellMeasThreshRsrq">-120</p>
       <p name="scellPdcchOlLa">disabled</p>
     </managedObject>
-    <managedObject class="NOKLTE:CAREL" distName="MRBTS-4486/LNBTS-4486/LNCEL-1/CAREL-1" version="xL24R3_2413_110" operation="create">
+    <managedObject class="NOKLTE:CAPR" distName="MRBTS-4486/LNBTS-4486/LNCEL-103/CAPR-7" version="xL24R3_2413_110" operation="create">
+      <p name="a3Offset">-6</p>
+      <p name="a3TimeToTrigger">ms320</p>
+      <p name="a3TriggerQuantity">RSRP</p>
+      <p name="a6Offset">6</p>
+      <p name="a6ReportInterval">640ms</p>
+      <p name="a6TimeToTrigger">320ms</p>
+      <p name="earfcnDL">3075</p>
+      <p name="enableA3Event">true</p>
+      <p name="enableA6Event">true</p>
+      <p name="enableFreqPrioSwap">disabled</p>
+      <p name="hysA3Offset">2</p>
+      <p name="hysA6Offset">0</p>
+      <p name="maxNumScellSwaps">0</p>
+      <p name="sFreqPrio">2</p>
+      <p name="scellMeasThreshRsrp">-110</p>
+      <p name="scellMeasThreshRsrq">-120</p>
+      <p name="scellPdcchOlLa">disabled</p>
+    </managedObject>
+    <managedObject class="NOKLTE:CAPR" distName="MRBTS-4486/LNBTS-4486/LNCEL-103/CAPR-8" version="xL24R3_2413_110" operation="create">
+      <p name="a3Offset">-6</p>
+      <p name="a3TimeToTrigger">ms320</p>
+      <p name="a3TriggerQuantity">RSRP</p>
+      <p name="a6Offset">6</p>
+      <p name="a6ReportInterval">640ms</p>
+      <p name="a6TimeToTrigger">320ms</p>
+      <p name="earfcnDL">3246</p>
+      <p name="enableA3Event">true</p>
+      <p name="enableA6Event">true</p>
+      <p name="enableFreqPrioSwap">disabled</p>
+      <p name="hysA3Offset">2</p>
+      <p name="hysA6Offset">0</p>
+      <p name="maxNumScellSwaps">0</p>
+      <p name="sFreqPrio">1</p>
+      <p name="scellMeasThreshRsrp">-110</p>
+      <p name="scellMeasThreshRsrq">-120</p>
+      <p name="scellPdcchOlLa">disabled</p>
+    </managedObject>
+    <managedObject class="NOKLTE:CAPR" distName="MRBTS-4486/LNBTS-4486/LNCEL-103/CAPR-9" version="xL24R3_2413_110" operation="create">
+      <p name="a3Offset">-6</p>
+      <p name="a3TimeToTrigger">ms320</p>
+      <p name="a3TriggerQuantity">RSRP</p>
+      <p name="a6Offset">6</p>
+      <p name="a6ReportInterval">640ms</p>
+      <p name="a6TimeToTrigger">320ms</p>
+      <p name="earfcnDL">2434</p>
+      <p name="enableA3Event">true</p>
+      <p name="enableA6Event">true</p>
+      <p name="enableFreqPrioSwap">disabled</p>
+      <p name="hysA3Offset">2</p>
+      <p name="hysA6Offset">0</p>
+      <p name="maxNumScellSwaps">0</p>
+      <p name="sFreqPrio">5</p>
+      <p name="scellMeasThreshRsrp">-110</p>
+      <p name="scellMeasThreshRsrq">-120</p>
+      <p name="scellPdcchOlLa">disabled</p>
+    </managedObject>
+    <managedObject class="NOKLTE:CAREL" distName="MRBTS-4486/LNBTS-4486/LNCEL-103/CAREL-1" version="xL24R3_2413_110" operation="create">
       <p name="lcrId">200</p>
-      <p name="lnBtsId">699593</p>
+      <p name="lnBtsId">4486</p>
       <p name="maxNumOfSuppMimoLayer">4-layer</p>
       <p name="pcellSwapAllowed">allowed</p>
       <p name="scellPrio">1</p>
     </managedObject>
-    <managedObject class="NOKLTE:CAREL" distName="MRBTS-4486/LNBTS-4486/LNCEL-1/CAREL-10" version="xL24R3_2413_110" operation="create">
-      <p name="lcrId">152</p>
-      <p name="lnBtsId">699593</p>
-      <p name="maxNumOfSuppMimoLayer">4-layer</p>
-      <p name="pcellSwapAllowed">allowed</p>
-      <p name="scellPrio">3</p>
-    </managedObject>
-    <managedObject class="NOKLTE:CAREL" distName="MRBTS-4486/LNBTS-4486/LNCEL-1/CAREL-2" version="xL24R3_2413_110" operation="create">
+    <managedObject class="NOKLTE:CAREL" distName="MRBTS-4486/LNBTS-4486/LNCEL-103/CAREL-2" version="xL24R3_2413_110" operation="create">
       <p name="lcrId">201</p>
-      <p name="lnBtsId">699593</p>
+      <p name="lnBtsId">4486</p>
       <p name="maxNumOfSuppMimoLayer">4-layer</p>
       <p name="pcellSwapAllowed">allowed</p>
       <p name="scellPrio">1</p>
     </managedObject>
-    <managedObject class="NOKLTE:CAREL" distName="MRBTS-4486/LNBTS-4486/LNCEL-1/CAREL-3" version="xL24R3_2413_110" operation="create">
-      <p name="lcrId">0</p>
-      <p name="lnBtsId">699593</p>
+    <managedObject class="NOKLTE:CAREL" distName="MRBTS-4486/LNBTS-4486/LNCEL-103/CAREL-3" version="xL24R3_2413_110" operation="create">
+      <p name="lcrId">202</p>
+      <p name="lnBtsId">4486</p>
       <p name="maxNumOfSuppMimoLayer">4-layer</p>
       <p name="pcellSwapAllowed">allowed</p>
-      <p name="scellPrio">2</p>
+      <p name="scellPrio">1</p>
     </managedObject>
-    <managedObject class="NOKLTE:CAREL" distName="MRBTS-4486/LNBTS-4486/LNCEL-1/CAREL-4" version="xL24R3_2413_110" operation="create">
-      <p name="lcrId">1</p>
-      <p name="lnBtsId">699593</p>
-      <p name="maxNumOfSuppMimoLayer">4-layer</p>
-      <p name="pcellSwapAllowed">allowed</p>
-      <p name="scellPrio">2</p>
-    </managedObject>
-    <managedObject class="NOKLTE:CAREL" distName="MRBTS-4486/LNBTS-4486/LNCEL-1/CAREL-5" version="xL24R3_2413_110" operation="create">
-      <p name="lcrId">2</p>
-      <p name="lnBtsId">699593</p>
-      <p name="maxNumOfSuppMimoLayer">4-layer</p>
-      <p name="pcellSwapAllowed">allowed</p>
-      <p name="scellPrio">2</p>
-    </managedObject>
-    <managedObject class="NOKLTE:CAREL" distName="MRBTS-4486/LNBTS-4486/LNCEL-1/CAREL-6" version="xL24R3_2413_110" operation="create">
-      <p name="lcrId">50</p>
-      <p name="lnBtsId">699593</p>
-      <p name="maxNumOfSuppMimoLayer">4-layer</p>
-      <p name="pcellSwapAllowed">allowed</p>
-      <p name="scellPrio">3</p>
-    </managedObject>
-    <managedObject class="NOKLTE:CAREL" distName="MRBTS-4486/LNBTS-4486/LNCEL-1/CAREL-7" version="xL24R3_2413_110" operation="create">
-      <p name="lcrId">51</p>
-      <p name="lnBtsId">699593</p>
-      <p name="maxNumOfSuppMimoLayer">4-layer</p>
-      <p name="pcellSwapAllowed">allowed</p>
-      <p name="scellPrio">3</p>
-    </managedObject>
-    <managedObject class="NOKLTE:CAREL" distName="MRBTS-4486/LNBTS-4486/LNCEL-1/CAREL-8" version="xL24R3_2413_110" operation="create">
-      <p name="lcrId">150</p>
-      <p name="lnBtsId">699593</p>
-      <p name="maxNumOfSuppMimoLayer">4-layer</p>
-      <p name="pcellSwapAllowed">allowed</p>
-      <p name="scellPrio">3</p>
-    </managedObject>
-    <managedObject class="NOKLTE:CAREL" distName="MRBTS-4486/LNBTS-4486/LNCEL-1/CAREL-9" version="xL24R3_2413_110" operation="create">
-      <p name="lcrId">151</p>
-      <p name="lnBtsId">699593</p>
-      <p name="maxNumOfSuppMimoLayer">4-layer</p>
-      <p name="pcellSwapAllowed">allowed</p>
-      <p name="scellPrio">3</p>
-    </managedObject>
-    <managedObject class="NOKLTE:DRX" distName="MRBTS-4486/LNBTS-4486/LNCEL-1/DRX-0" version="xL24R3_2413_110" operation="create">
+    <managedObject class="NOKLTE:DRX" distName="MRBTS-4486/LNBTS-4486/LNCEL-103/DRX-0" version="xL24R3_2413_110" operation="create">
       <p name="applyOutOfSyncState">extendedDrxOnly</p>
       <p name="drxApplyDeviceType">true</p>
       <p name="qci1DrxOffThreshold">80</p>
@@ -878,115 +871,91 @@
         </item>
       </list>
     </managedObject>
-    <managedObject class="NOKLTE:IFGDPR" distName="MRBTS-4486/LNBTS-4486/LNCEL-1/IFGDPR-0" version="xL24R3_2413_110" operation="create">
-      <p name="algSelection">weighted probability randomization</p>
-      <p name="groupPrio">12</p>
-      <p name="groupSize">0</p>
-    </managedObject>
-    <managedObject class="NOKLTE:IFGPR" distName="MRBTS-4486/LNBTS-4486/LNCEL-1/IFGPR-0" version="xL24R3_2413_110" operation="create">
-      <p name="algSelection">weighted probability randomization</p>
-    </managedObject>
-    <managedObject class="NOKLTE:IRFIM" distName="MRBTS-4486/LNBTS-4486/LNCEL-1/IRFIM-2" version="xL24R3_2413_110" operation="create">
-      <p name="dlCarFrqEut">3246</p>
+    <managedObject class="NOKLTE:IRFIM" distName="MRBTS-4486/LNBTS-4486/LNCEL-103/IRFIM-1" version="xL24R3_2413_110" operation="create">
+      <p name="dlCarFrqEut">3075</p>
       <p name="enableA4IMLB">enabled</p>
       <p name="eutCelResPrio">6</p>
       <p name="idleLBEutCelResPrio">30</p>
-      <p name="idleLBEutCelResPrio2CC">34</p>
-      <p name="idleLBEutCelResPrio3CC">34</p>
-      <p name="idleLBEutCelResPrio4CC">34</p>
-      <p name="idleLBEutCelResPrio5CC">34</p>
-      <p name="idleLBEutCelResWeight">50</p>
-      <p name="idleLBEutCelResWeight2CC">100</p>
-      <p name="idleLBEutCelResWeight3CC">100</p>
-      <p name="idleLBEutCelResWeight4CC">100</p>
-      <p name="idleLBEutCelResWeight5CC">100</p>
+      <p name="idleLBEutCelResWeight">65</p>
       <p name="incMonExSel">R8ListPartPreferred</p>
       <p name="interFrqThrH">10</p>
-      <p name="interFrqThrL">10</p>
+      <p name="interFrqThrL">6</p>
       <p name="interPresAntP">true</p>
-      <p name="interTResEut">1</p>
+      <p name="interTResEut">0</p>
       <p name="mbmsNeighCellConfigInterF">00</p>
-      <p name="measBdw">100mbw</p>
+      <p name="measBdw">75mbw</p>
       <p name="minDeltaRsrpIMLB">-50</p>
       <p name="minDeltaRsrqIMLB">-100</p>
-      <p name="minRsrpIMLB">-112</p>
+      <p name="minRsrpIMLB">-116</p>
       <p name="minRsrqIMLB">-160</p>
       <p name="qOffFrq">0 dB</p>
       <p name="qRxLevMinInterF">-122</p>
       <p name="reducedMeasPerformance">false</p>
     </managedObject>
-    <managedObject class="NOKLTE:IRFIM" distName="MRBTS-4486/LNBTS-4486/LNCEL-1/IRFIM-3" version="xL24R3_2413_110" operation="create">
+    <managedObject class="NOKLTE:IRFIM" distName="MRBTS-4486/LNBTS-4486/LNCEL-103/IRFIM-2" version="xL24R3_2413_110" operation="create">
+      <p name="dlCarFrqEut">3246</p>
+      <p name="enableA4IMLB">enabled</p>
+      <p name="eutCelResPrio">6</p>
+      <p name="idleLBEutCelResPrio">30</p>
+      <p name="idleLBEutCelResWeight">65</p>
+      <p name="incMonExSel">R8ListPartPreferred</p>
+      <p name="interFrqThrH">10</p>
+      <p name="interFrqThrL">6</p>
+      <p name="interPresAntP">true</p>
+      <p name="interTResEut">0</p>
+      <p name="mbmsNeighCellConfigInterF">00</p>
+      <p name="measBdw">100mbw</p>
+      <p name="minDeltaRsrpIMLB">-50</p>
+      <p name="minDeltaRsrqIMLB">-100</p>
+      <p name="minRsrpIMLB">-116</p>
+      <p name="minRsrqIMLB">-160</p>
+      <p name="qOffFrq">0 dB</p>
+      <p name="qRxLevMinInterF">-122</p>
+      <p name="reducedMeasPerformance">false</p>
+    </managedObject>
+    <managedObject class="NOKLTE:IRFIM" distName="MRBTS-4486/LNBTS-4486/LNCEL-103/IRFIM-3" version="xL24R3_2413_110" operation="create">
       <p name="dlCarFrqEut">2434</p>
       <p name="enableA4IMLB">enabled</p>
-      <p name="eutCelResPrio">4</p>
-      <p name="idleLBEutCelResPrio">10</p>
-      <p name="idleLBEutCelResWeight">1</p>
+      <p name="eutCelResPrio">3</p>
+      <p name="idleLBEutCelResPrio">15</p>
+      <p name="idleLBEutCelResWeight">3</p>
       <p name="incMonExSel">R8ListPartPreferred</p>
-      <p name="interFrqThrH">4</p>
-      <p name="interFrqThrL">4</p>
+      <p name="interFrqThrH">6</p>
+      <p name="interFrqThrL">6</p>
       <p name="interPresAntP">true</p>
       <p name="interTResEut">1</p>
       <p name="mbmsNeighCellConfigInterF">00</p>
       <p name="measBdw">25mbw</p>
       <p name="minDeltaRsrpIMLB">-50</p>
       <p name="minDeltaRsrqIMLB">-100</p>
-      <p name="minRsrpIMLB">-112</p>
+      <p name="minRsrpIMLB">-116</p>
       <p name="minRsrqIMLB">-160</p>
       <p name="qOffFrq">0 dB</p>
       <p name="qRxLevMinInterF">-122</p>
       <p name="reducedMeasPerformance">false</p>
     </managedObject>
-    <managedObject class="NOKLTE:IRFIM" distName="MRBTS-4486/LNBTS-4486/LNCEL-1/IRFIM-5" version="xL24R3_2413_110" operation="create">
-      <p name="dlCarFrqEut">9560</p>
-      <p name="enableA4IMLB">enabled</p>
-      <p name="eutCelResPrio">4</p>
-      <p name="idleLBEutCelResPrio">15</p>
-      <p name="idleLBEutCelResWeight">2</p>
-      <p name="incMonExSel">R8ListPartPreferred</p>
-      <p name="interFrqThrH">4</p>
-      <p name="interFrqThrL">4</p>
-      <p name="interPresAntP">true</p>
-      <p name="interTResEut">1</p>
-      <p name="mbmsNeighCellConfigInterF">00</p>
-      <p name="measBdw">50mbw</p>
-      <p name="minDeltaRsrpIMLB">-50</p>
-      <p name="minDeltaRsrqIMLB">-100</p>
-      <p name="minRsrpIMLB">-112</p>
-      <p name="minRsrqIMLB">-160</p>
-      <p name="qOffFrq">0 dB</p>
-      <p name="qRxLevMinInterF">-122</p>
-      <p name="reducedMeasPerformance">false</p>
-    </managedObject>
-    <managedObject class="NOKLTE:IRFIM" distName="MRBTS-4486/LNBTS-4486/LNCEL-1/IRFIM-6" version="xL24R3_2413_110" operation="create">
+    <managedObject class="NOKLTE:IRFIM" distName="MRBTS-4486/LNBTS-4486/LNCEL-103/IRFIM-4" version="xL24R3_2413_110" operation="create">
       <p name="dlCarFrqEut">675</p>
       <p name="enableA4IMLB">enabled</p>
       <p name="eutCelResPrio">5</p>
-      <p name="idleLBEutCelResPrio">20</p>
-      <p name="idleLBEutCelResPrio2CC">30</p>
-      <p name="idleLBEutCelResPrio3CC">30</p>
-      <p name="idleLBEutCelResPrio4CC">30</p>
-      <p name="idleLBEutCelResPrio5CC">30</p>
-      <p name="idleLBEutCelResWeight">20</p>
-      <p name="idleLBEutCelResWeight2CC">50</p>
-      <p name="idleLBEutCelResWeight3CC">50</p>
-      <p name="idleLBEutCelResWeight4CC">50</p>
-      <p name="idleLBEutCelResWeight5CC">50</p>
+      <p name="idleLBEutCelResPrio">25</p>
+      <p name="idleLBEutCelResWeight">30</p>
       <p name="incMonExSel">R8ListPartPreferred</p>
-      <p name="interFrqThrH">10</p>
-      <p name="interFrqThrL">10</p>
+      <p name="interFrqThrH">8</p>
+      <p name="interFrqThrL">6</p>
       <p name="interPresAntP">true</p>
-      <p name="interTResEut">1</p>
+      <p name="interTResEut">0</p>
       <p name="mbmsNeighCellConfigInterF">00</p>
       <p name="measBdw">75mbw</p>
       <p name="minDeltaRsrpIMLB">-50</p>
       <p name="minDeltaRsrqIMLB">-100</p>
-      <p name="minRsrpIMLB">-112</p>
+      <p name="minRsrpIMLB">-116</p>
       <p name="minRsrqIMLB">-160</p>
       <p name="qOffFrq">0 dB</p>
       <p name="qRxLevMinInterF">-122</p>
       <p name="reducedMeasPerformance">false</p>
     </managedObject>
-    <managedObject class="NOKLTE:LNCEL_FDD" distName="MRBTS-4486/LNBTS-4486/LNCEL-1/LNCEL_FDD-0" version="xL24R3_2413_110" operation="create">
+    <managedObject class="NOKLTE:LNCEL_FDD" distName="MRBTS-4486/LNBTS-4486/LNCEL-103/LNCEL_FDD-0" version="xL24R3_2413_110" operation="create">
       <p name="act1TxIn2Tx">false</p>
       <p name="actAperPmiPolling">false</p>
       <p name="actAutoPucchAlloc">true</p>
@@ -1016,36 +985,36 @@
       <p name="activatedMimoTM">TM4</p>
       <p name="addNumDrbRadioReasHo">35</p>
       <p name="addNumDrbTimeCriticalHo">100</p>
-      <p name="addNumQci1DrbRadioReasHo">30</p>
-      <p name="addNumQci1DrbTimeCriticalHo">30</p>
+      <p name="addNumQci1DrbRadioReasHo">10</p>
+      <p name="addNumQci1DrbTimeCriticalHo">10</p>
       <p name="blankedPucch">0</p>
       <p name="cqiAperPollT">3</p>
-      <p name="dlChBw">15 MHz</p>
+      <p name="dlChBw">10 MHz</p>
       <p name="dlMimoMode">Closed Loop MIMO (4x4)</p>
       <p name="dlRsBoost">0dB</p>
       <p name="dlSrbMimoMode">SpatialMultiplexing</p>
       <p name="dlpcMimoComp">0</p>
       <p name="dlsRat1Mode">extended</p>
-      <p name="earfcnDL">3075</p>
-      <p name="earfcnUL">21075</p>
+      <p name="earfcnDL">9560</p>
+      <p name="earfcnUL">27560</p>
       <p name="fourLayerMimoAvSpectralEff">1</p>
       <p name="maxNrSymPdcch">3</p>
-      <p name="maxNumActDrb">3750</p>
-      <p name="maxNumActUE">1200</p>
+      <p name="maxNumActDrb">3000</p>
+      <p name="maxNumActUE">960</p>
       <p name="maxNumCaConfUe">300</p>
       <p name="maxNumCaConfUe3c">300</p>
       <p name="maxNumCaConfUeDc">300</p>
-      <p name="maxNumQci1Drb">300</p>
-      <p name="maxNumUeDl">17</p>
-      <p name="maxNumUeUl">17</p>
+      <p name="maxNumQci1Drb">200</p>
+      <p name="maxNumUeDl">14</p>
+      <p name="maxNumUeUl">14</p>
       <p name="prachCS">12</p>
       <p name="prachConfIndex">3</p>
-      <p name="prachFreqOff">10</p>
+      <p name="prachFreqOff">13</p>
       <p name="prachHsFlag">false</p>
       <p name="prsConfigurationIndex">151</p>
       <p name="prsNumDlFrames">1</p>
       <p name="pucchNAnCs">0</p>
-      <p name="rootSeqIndex">300</p>
+      <p name="rootSeqIndex">620</p>
       <p name="selectOuterPuschRegion">None</p>
       <p name="slimRfFilterDL">Nominal</p>
       <p name="slimRfFilterUL">Nominal</p>
@@ -1053,8 +1022,9 @@
       <p name="srsPwrOffset">7</p>
       <p name="syncSigTxMode">TxDiv</p>
       <p name="twoLayerMimoAvSpectralEff">1</p>
-      <p name="ulChBw">15 MHz</p>
+      <p name="ulChBw">10 MHz</p>
       <p name="ulCombinationMode">IRC</p>
+      <p name="ulInterferenceOffset">0</p>
       <p name="ulpcRarespTpc">2</p>
       <p name="ulsMaxCrSmallPusch">957</p>
       <list name="mimoClConfig">
@@ -1073,9 +1043,16 @@
           <p name="mimoOlRiThU">28</p>
         </item>
       </list>
+      <list name="utranLbLoadThresholds">
+        <item>
+          <p name="highLoadGbrDl">80</p>
+          <p name="highLoadNonGbrDl">80</p>
+          <p name="highLoadPdcch">80</p>
+        </item>
+      </list>
     </managedObject>
-    <managedObject class="NOKLTE:APUCCH_FDD" distName="MRBTS-4486/LNBTS-4486/LNCEL-1/LNCEL_FDD-0/APUCCH_FDD-0" version="xL24R3_2413_110" operation="create">
-      <p name="aPucchAddAUeRrHo">15</p>
+    <managedObject class="NOKLTE:APUCCH_FDD" distName="MRBTS-4486/LNBTS-4486/LNCEL-103/LNCEL_FDD-0/APUCCH_FDD-0" version="xL24R3_2413_110" operation="create">
+      <p name="aPucchAddAUeRrHo">10</p>
       <p name="aPucchAddAUeTcHo">15</p>
       <p name="aPucchMinNumEmergencySessions">10</p>
       <p name="aPucchMinNumRrc">10</p>
@@ -1085,20 +1062,20 @@
       <p name="pucchArRateEvalWinLength">0</p>
       <p name="selectPrachRegion">None</p>
     </managedObject>
-    <managedObject class="NOKLTE:MPUCCH_FDD" distName="MRBTS-4486/LNBTS-4486/LNCEL-1/LNCEL_FDD-0/MPUCCH_FDD-0" version="xL24R3_2413_110" operation="create">
-      <p name="addAUeRrHo">20</p>
-      <p name="addAUeTcHo">20</p>
+    <managedObject class="NOKLTE:MPUCCH_FDD" distName="MRBTS-4486/LNBTS-4486/LNCEL-103/LNCEL_FDD-0/MPUCCH_FDD-0" version="xL24R3_2413_110" operation="create">
+      <p name="addAUeRrHo">15</p>
+      <p name="addAUeTcHo">18</p>
       <p name="addEmergencySessions">70</p>
       <p name="cellSrPeriod">20ms</p>
       <p name="cqiPerNp">40ms</p>
       <p name="deltaPucchShift">2</p>
-      <p name="maxNumRrc">1230</p>
-      <p name="maxNumRrcEmergency">800</p>
+      <p name="maxNumRrc">1000</p>
+      <p name="maxNumRrcEmergency">560</p>
       <p name="minNumEmergencySessions">10</p>
       <p name="minNumRrc">10</p>
       <p name="minNumRrcNoDrb">5</p>
-      <p name="n1PucchAn">144</p>
-      <p name="nCqiRb">13</p>
+      <p name="n1PucchAn">108</p>
+      <p name="nCqiRb">19</p>
       <p name="nPucchF3Prbs">2</p>
       <p name="phichDur">Normal</p>
       <p name="phichRes">N = 1/6</p>
@@ -1106,34 +1083,61 @@
       <p name="riPerM">1</p>
       <p name="riPerOffset">-1</p>
     </managedObject>
-    <managedObject class="NOKLTE:LNHOG" distName="MRBTS-4486/LNBTS-4486/LNCEL-1/LNHOG-0" version="xL24R3_2413_110" operation="create">
-      <list name="arfcnValueListGERAN">
-        <p>188</p>
-      </list>
-      <p name="b2Threshold1GERAN">20</p>
-      <p name="b2Threshold1GERANQci1">20</p>
-      <p name="b2Threshold2RssiGERAN">10</p>
-      <p name="b2Threshold2RssiGERANQci1">13</p>
-      <p name="b2TimeToTriggerGERANMeas">1024ms</p>
-      <p name="bandIndicatorGERAN">pcs1900</p>
-      <p name="hysB2ThresholdGERAN">0</p>
-      <p name="nccperm">0</p>
-      <p name="reportIntervalGERAN">480ms</p>
-    </managedObject>
-    <managedObject class="NOKLTE:LNHOIF" distName="MRBTS-4486/LNBTS-4486/LNCEL-1/LNHOIF-2" version="xL24R3_2413_110" operation="create">
+    <managedObject class="NOKLTE:LNHOIF" distName="MRBTS-4486/LNBTS-4486/LNCEL-103/LNHOIF-1" version="xL24R3_2413_110" operation="create">
       <p name="a3OffsetRsrpInterFreq">30</p>
       <p name="a3OffsetRsrpInterFreqQci1">30</p>
       <p name="a3OffsetRsrqInterFreq">30</p>
       <p name="a3ReportAmountRsrpInterFreq">infinity</p>
       <p name="a3ReportAmountRsrqInterFreq">infinity</p>
-      <p name="a3ReportIntervalRsrpInterFreq">640ms</p>
+      <p name="a3ReportIntervalRsrpInterFreq">240ms</p>
       <p name="a3ReportIntervalRsrqInterFreq">640ms</p>
-      <p name="a3TimeToTriggerRsrpInterFreq">5120ms</p>
-      <p name="a3TimeToTriggerRsrqInterFreq">5120ms</p>
+      <p name="a3TimeToTriggerRsrpInterFreq">1024ms</p>
+      <p name="a3TimeToTriggerRsrqInterFreq">512ms</p>
       <p name="a5ReportAmountRsrpInterFreq">infinity</p>
       <p name="a5ReportAmountRsrqInterFreq">infinity</p>
-      <p name="a5ReportIntervalInterFreq">640ms</p>
-      <p name="a5TimeToTriggerInterFreq">1280ms</p>
+      <p name="a5ReportIntervalInterFreq">240ms</p>
+      <p name="a5TimeToTriggerInterFreq">256ms</p>
+      <p name="eutraCarrierInfo">3075</p>
+      <p name="hysA3OffsetRsrpInterFreq">30</p>
+      <p name="hysA3OffsetRsrqInterFreq">30</p>
+      <p name="hysThreshold3InterFreq">0</p>
+      <p name="iFGroupPrio">12</p>
+      <p name="interPresAntP">true</p>
+      <p name="measQuantInterFreq">rsrp</p>
+      <p name="measurementBandwidth">mbw75</p>
+      <p name="offsetFreqInter">0dB</p>
+      <p name="threshold3InterFreq">22</p>
+      <p name="threshold3InterFreqQci1">32</p>
+      <p name="threshold3aInterFreq">35</p>
+      <p name="threshold3aInterFreqQci1">38</p>
+      <p name="thresholdRsrpIFLBFilter">-90</p>
+      <p name="thresholdRsrpIFSBFilter">-98</p>
+      <p name="thresholdRsrqIFLBFilter">-100</p>
+      <p name="thresholdRsrqIFSBFilter">-120</p>
+      <list name="rsrqA5InterFreqMobilityParams">
+        <item>
+          <p name="a5ReportIntervalRsrqInterFreq">640ms</p>
+          <p name="a5TimeToTriggerRsrqInterFreq">480ms</p>
+          <p name="hysThreshold3RsrqInterFreq">0</p>
+          <p name="threshold3aRsrqInterFreq">-22</p>
+          <p name="threshold3RsrqInterFreq">-32</p>
+        </item>
+      </list>
+    </managedObject>
+    <managedObject class="NOKLTE:LNHOIF" distName="MRBTS-4486/LNBTS-4486/LNCEL-103/LNHOIF-2" version="xL24R3_2413_110" operation="create">
+      <p name="a3OffsetRsrpInterFreq">30</p>
+      <p name="a3OffsetRsrpInterFreqQci1">30</p>
+      <p name="a3OffsetRsrqInterFreq">30</p>
+      <p name="a3ReportAmountRsrpInterFreq">infinity</p>
+      <p name="a3ReportAmountRsrqInterFreq">infinity</p>
+      <p name="a3ReportIntervalRsrpInterFreq">240ms</p>
+      <p name="a3ReportIntervalRsrqInterFreq">640ms</p>
+      <p name="a3TimeToTriggerRsrpInterFreq">1024ms</p>
+      <p name="a3TimeToTriggerRsrqInterFreq">512ms</p>
+      <p name="a5ReportAmountRsrpInterFreq">infinity</p>
+      <p name="a5ReportAmountRsrqInterFreq">infinity</p>
+      <p name="a5ReportIntervalInterFreq">240ms</p>
+      <p name="a5TimeToTriggerInterFreq">256ms</p>
       <p name="eutraCarrierInfo">3246</p>
       <p name="hysA3OffsetRsrpInterFreq">30</p>
       <p name="hysA3OffsetRsrqInterFreq">30</p>
@@ -1143,59 +1147,53 @@
       <p name="measQuantInterFreq">rsrp</p>
       <p name="measurementBandwidth">mbw100</p>
       <p name="offsetFreqInter">0dB</p>
-      <p name="t312">0ms</p>
-      <p name="threshold3InterFreq">26</p>
-      <p name="threshold3InterFreqQci1">26</p>
-      <p name="threshold3aInterFreq">30</p>
-      <p name="threshold3aInterFreqQci1">30</p>
-      <p name="thresholdRsrpEndcFilt">-111</p>
-      <p name="thresholdRsrpIFLBFilter">-114</p>
+      <p name="threshold3InterFreq">22</p>
+      <p name="threshold3InterFreqQci1">32</p>
+      <p name="threshold3aInterFreq">35</p>
+      <p name="threshold3aInterFreqQci1">38</p>
+      <p name="thresholdRsrpIFLBFilter">-90</p>
       <p name="thresholdRsrpIFSBFilter">-98</p>
-      <p name="thresholdRsrqEndcFilt">-120</p>
-      <p name="thresholdRsrqIFLBFilter">-140</p>
+      <p name="thresholdRsrqIFLBFilter">-100</p>
       <p name="thresholdRsrqIFSBFilter">-120</p>
       <list name="rsrqA5InterFreqMobilityParams">
         <item>
           <p name="a5ReportIntervalRsrqInterFreq">640ms</p>
-          <p name="a5TimeToTriggerRsrqInterFreq">1280ms</p>
+          <p name="a5TimeToTriggerRsrqInterFreq">480ms</p>
           <p name="hysThreshold3RsrqInterFreq">0</p>
-          <p name="threshold3aRsrqInterFreq">-28</p>
-          <p name="threshold3RsrqInterFreq">-36</p>
+          <p name="threshold3aRsrqInterFreq">-22</p>
+          <p name="threshold3RsrqInterFreq">-32</p>
         </item>
       </list>
     </managedObject>
-    <managedObject class="NOKLTE:LNHOIF" distName="MRBTS-4486/LNBTS-4486/LNCEL-1/LNHOIF-5" version="xL24R3_2413_110" operation="create">
+    <managedObject class="NOKLTE:LNHOIF" distName="MRBTS-4486/LNBTS-4486/LNCEL-103/LNHOIF-3" version="xL24R3_2413_110" operation="create">
       <p name="a3OffsetRsrpInterFreq">30</p>
       <p name="a3OffsetRsrpInterFreqQci1">30</p>
       <p name="a3OffsetRsrqInterFreq">30</p>
       <p name="a3ReportAmountRsrpInterFreq">infinity</p>
       <p name="a3ReportAmountRsrqInterFreq">infinity</p>
-      <p name="a3ReportIntervalRsrpInterFreq">640ms</p>
+      <p name="a3ReportIntervalRsrpInterFreq">240ms</p>
       <p name="a3ReportIntervalRsrqInterFreq">640ms</p>
-      <p name="a3TimeToTriggerRsrpInterFreq">5120ms</p>
-      <p name="a3TimeToTriggerRsrqInterFreq">5120ms</p>
+      <p name="a3TimeToTriggerRsrpInterFreq">1024ms</p>
+      <p name="a3TimeToTriggerRsrqInterFreq">512ms</p>
       <p name="a5ReportAmountRsrpInterFreq">infinity</p>
       <p name="a5ReportAmountRsrqInterFreq">infinity</p>
-      <p name="a5ReportIntervalInterFreq">640ms</p>
-      <p name="a5TimeToTriggerInterFreq">2560ms</p>
-      <p name="eutraCarrierInfo">9560</p>
+      <p name="a5ReportIntervalInterFreq">240ms</p>
+      <p name="a5TimeToTriggerInterFreq">1280ms</p>
+      <p name="eutraCarrierInfo">2434</p>
       <p name="hysA3OffsetRsrpInterFreq">30</p>
       <p name="hysA3OffsetRsrqInterFreq">30</p>
       <p name="hysThreshold3InterFreq">0</p>
       <p name="iFGroupPrio">12</p>
       <p name="interPresAntP">true</p>
       <p name="measQuantInterFreq">rsrp</p>
-      <p name="measurementBandwidth">mbw50</p>
+      <p name="measurementBandwidth">mbw25</p>
       <p name="offsetFreqInter">0dB</p>
-      <p name="t312">0ms</p>
-      <p name="threshold3InterFreq">26</p>
-      <p name="threshold3InterFreqQci1">26</p>
-      <p name="threshold3aInterFreq">30</p>
-      <p name="threshold3aInterFreqQci1">30</p>
-      <p name="thresholdRsrpEndcFilt">-111</p>
-      <p name="thresholdRsrpIFLBFilter">-90</p>
+      <p name="threshold3InterFreq">22</p>
+      <p name="threshold3InterFreqQci1">32</p>
+      <p name="threshold3aInterFreq">35</p>
+      <p name="threshold3aInterFreqQci1">38</p>
+      <p name="thresholdRsrpIFLBFilter">-98</p>
       <p name="thresholdRsrpIFSBFilter">-98</p>
-      <p name="thresholdRsrqEndcFilt">-120</p>
       <p name="thresholdRsrqIFLBFilter">-140</p>
       <p name="thresholdRsrqIFSBFilter">-120</p>
       <list name="rsrqA5InterFreqMobilityParams">
@@ -1203,25 +1201,25 @@
           <p name="a5ReportIntervalRsrqInterFreq">640ms</p>
           <p name="a5TimeToTriggerRsrqInterFreq">2560ms</p>
           <p name="hysThreshold3RsrqInterFreq">0</p>
-          <p name="threshold3aRsrqInterFreq">-28</p>
+          <p name="threshold3aRsrqInterFreq">-14</p>
           <p name="threshold3RsrqInterFreq">-36</p>
         </item>
       </list>
     </managedObject>
-    <managedObject class="NOKLTE:LNHOIF" distName="MRBTS-4486/LNBTS-4486/LNCEL-1/LNHOIF-6" version="xL24R3_2413_110" operation="create">
+    <managedObject class="NOKLTE:LNHOIF" distName="MRBTS-4486/LNBTS-4486/LNCEL-103/LNHOIF-4" version="xL24R3_2413_110" operation="create">
       <p name="a3OffsetRsrpInterFreq">30</p>
       <p name="a3OffsetRsrpInterFreqQci1">30</p>
       <p name="a3OffsetRsrqInterFreq">30</p>
       <p name="a3ReportAmountRsrpInterFreq">infinity</p>
       <p name="a3ReportAmountRsrqInterFreq">infinity</p>
-      <p name="a3ReportIntervalRsrpInterFreq">640ms</p>
+      <p name="a3ReportIntervalRsrpInterFreq">240ms</p>
       <p name="a3ReportIntervalRsrqInterFreq">640ms</p>
-      <p name="a3TimeToTriggerRsrpInterFreq">5120ms</p>
-      <p name="a3TimeToTriggerRsrqInterFreq">5120ms</p>
+      <p name="a3TimeToTriggerRsrpInterFreq">1024ms</p>
+      <p name="a3TimeToTriggerRsrqInterFreq">512ms</p>
       <p name="a5ReportAmountRsrpInterFreq">infinity</p>
       <p name="a5ReportAmountRsrqInterFreq">infinity</p>
-      <p name="a5ReportIntervalInterFreq">640ms</p>
-      <p name="a5TimeToTriggerInterFreq">1280ms</p>
+      <p name="a5ReportIntervalInterFreq">240ms</p>
+      <p name="a5TimeToTriggerInterFreq">256ms</p>
       <p name="eutraCarrierInfo">675</p>
       <p name="hysA3OffsetRsrpInterFreq">30</p>
       <p name="hysA3OffsetRsrqInterFreq">30</p>
@@ -1231,28 +1229,25 @@
       <p name="measQuantInterFreq">rsrp</p>
       <p name="measurementBandwidth">mbw75</p>
       <p name="offsetFreqInter">0dB</p>
-      <p name="t312">0ms</p>
-      <p name="threshold3InterFreq">26</p>
-      <p name="threshold3InterFreqQci1">26</p>
-      <p name="threshold3aInterFreq">30</p>
-      <p name="threshold3aInterFreqQci1">30</p>
-      <p name="thresholdRsrpEndcFilt">-111</p>
+      <p name="threshold3InterFreq">22</p>
+      <p name="threshold3InterFreqQci1">32</p>
+      <p name="threshold3aInterFreq">35</p>
+      <p name="threshold3aInterFreqQci1">38</p>
       <p name="thresholdRsrpIFLBFilter">-112</p>
       <p name="thresholdRsrpIFSBFilter">-98</p>
-      <p name="thresholdRsrqEndcFilt">-120</p>
       <p name="thresholdRsrqIFLBFilter">-140</p>
       <p name="thresholdRsrqIFSBFilter">-120</p>
       <list name="rsrqA5InterFreqMobilityParams">
         <item>
           <p name="a5ReportIntervalRsrqInterFreq">640ms</p>
-          <p name="a5TimeToTriggerRsrqInterFreq">1280ms</p>
+          <p name="a5TimeToTriggerRsrqInterFreq">480ms</p>
           <p name="hysThreshold3RsrqInterFreq">0</p>
-          <p name="threshold3aRsrqInterFreq">-28</p>
-          <p name="threshold3RsrqInterFreq">-36</p>
+          <p name="threshold3aRsrqInterFreq">-22</p>
+          <p name="threshold3RsrqInterFreq">-32</p>
         </item>
       </list>
     </managedObject>
-    <managedObject class="NOKLTE:LNHOW" distName="MRBTS-4486/LNBTS-4486/LNCEL-1/LNHOW-0" version="xL24R3_2413_110" operation="create">
+    <managedObject class="NOKLTE:LNHOW" distName="MRBTS-4486/LNBTS-4486/LNCEL-103/LNHOW-0" version="xL24R3_2413_110" operation="create">
       <p name="b1ThresholdCSFBUtraEcn0">24</p>
       <p name="b1ThresholdCSFBUtraRscp">15</p>
       <p name="b1ThresholdUtraEcn0Srvcc">28</p>
@@ -1260,23 +1255,22 @@
       <p name="b1TimeToTriggerCSFBUtraMeas">256ms</p>
       <p name="b1TimeToTriggerSrvccUtraMeas">256ms</p>
       <p name="b2Threshold1Utra">20</p>
-      <p name="b2Threshold1UtraQci1">20</p>
-      <p name="b2Threshold2UtraEcn0">36</p>
-      <p name="b2Threshold2UtraEcn0Qci1">34</p>
+      <p name="b2Threshold1UtraQci1">22</p>
+      <p name="b2Threshold2UtraEcn0">25</p>
+      <p name="b2Threshold2UtraEcn0Qci1">30</p>
       <p name="b2Threshold2UtraRscp">11</p>
       <p name="b2Threshold2UtraRscpQci1">14</p>
-      <p name="b2TimeToTriggerUtraMeas">2560ms</p>
+      <p name="b2TimeToTriggerUtraMeas">1280ms</p>
       <p name="hysB1ThresholdCSFBUtra">0</p>
       <p name="hysB1ThresholdSrvccUtra">0</p>
       <p name="hysB2ThresholdUtra">0</p>
       <p name="maxNumCsfbTargets">16</p>
       <p name="offsetFreqUtra">0</p>
       <p name="reportIntervalUtra">480ms</p>
-      <p name="thresholdEcn0UtranLbFilter">0</p>
       <p name="thresholdRscpUtranLbFilter">0</p>
       <p name="utraCarrierFreq">4387</p>
     </managedObject>
-    <managedObject class="NOKLTE:REDRT" distName="MRBTS-4486/LNBTS-4486/LNCEL-1/REDRT-2" version="xL24R3_2413_110" operation="create">
+    <managedObject class="NOKLTE:REDRT" distName="MRBTS-4486/LNBTS-4486/LNCEL-103/REDRT-2" version="xL24R3_2413_110" operation="create">
       <p name="addGsmSIToRedirMsg">both</p>
       <p name="csFallBPrio">1</p>
       <p name="emerCallPrio">3</p>
@@ -1284,7 +1278,7 @@
       <p name="redirRat">utraFDD</p>
       <p name="redirectPrio">1</p>
     </managedObject>
-    <managedObject class="NOKLTE:SDRX" distName="MRBTS-4486/LNBTS-4486/LNCEL-1/SDRX-0" version="xL24R3_2413_110" operation="create">
+    <managedObject class="NOKLTE:SDRX" distName="MRBTS-4486/LNBTS-4486/LNCEL-103/SDRX-0" version="xL24R3_2413_110" operation="create">
       <list name="drxSmartProfile2">
         <item>
           <p name="drxInactivityT">4</p>
@@ -1351,27 +1345,28 @@
         </item>
       </list>
     </managedObject>
-    <managedObject class="NOKLTE:SIB" distName="MRBTS-4486/LNBTS-4486/LNCEL-1/SIB-0" version="xL24R3_2413_110" operation="create">
+    <managedObject class="NOKLTE:SIB" distName="MRBTS-4486/LNBTS-4486/LNCEL-103/SIB-0" version="xL24R3_2413_110" operation="create">
       <p name="acbProfileId">0</p>
       <p name="autoAcBarringStartTimer">30</p>
       <p name="autoAcbPlmnRmvlStopTimer">900</p>
       <p name="autoPlmnRmvlStartTimer">300</p>
       <p name="cellBarred">notBarred</p>
-      <p name="cellReSelPrio">6</p>
+      <p name="cellReSelPrio">4</p>
       <p name="intrFrqCelRes">allowed</p>
       <p name="intraPresAntP">true</p>
+      <p name="mbmsNeighCellConfigIntraF">00</p>
       <p name="modPeriodCoeff">4</p>
       <p name="n310">n10</p>
       <p name="n311">n1</p>
       <p name="pMaxOwnCell">23</p>
-      <p name="prachPwrRamp">2dB</p>
-      <p name="preambTxMax">10</p>
+      <p name="prachPwrRamp">4dB</p>
+      <p name="preambTxMax">50</p>
       <p name="primPlmnCellres">Not Reserved</p>
       <p name="qHyst">3dB</p>
       <p name="qrxlevmin">-122</p>
-      <p name="qrxlevminintraF">-122</p>
+      <p name="qrxlevminintraF">-116</p>
       <p name="sIntrasearch">52</p>
-      <p name="sNonIntrsearch">10</p>
+      <p name="sNonIntrsearch">4</p>
       <p name="siWindowLen">20ms</p>
       <p name="sib2xTransmit">false</p>
       <p name="t300">400ms</p>
@@ -1379,8 +1374,8 @@
       <p name="t310">2000ms</p>
       <p name="t311">10000ms</p>
       <p name="tReselEutr">1</p>
-      <p name="threshSrvLow">8</p>
-      <p name="ulpcIniPrePwr">-100 dBm</p>
+      <p name="threshSrvLow">2</p>
+      <p name="ulpcIniPrePwr">-104 dBm</p>
       <list name="celResTiF">
         <item>
           <p name="celResTiFHM">0.5</p>
@@ -1403,12 +1398,12 @@
       </list>
       <list name="sibSchedulingList">
         <item>
-          <p name="siMessagePeriodicity">320ms</p>
+          <p name="siMessagePeriodicity">160ms</p>
           <p name="siMessageRepetition">1</p>
           <p name="siMessageSibType">SIB6</p>
         </item>
         <item>
-          <p name="siMessagePeriodicity">320ms</p>
+          <p name="siMessagePeriodicity">160ms</p>
           <p name="siMessageRepetition">1</p>
           <p name="siMessageSibType">SIB5</p>
         </item>
@@ -1423,8 +1418,14 @@
           <p name="tHystNormal">30s</p>
         </item>
       </list>
+      <list name="uplinkPCCommonr10">
+        <item>
+          <p name="deltaFPucchF1bCSr10">deltaF1</p>
+          <p name="deltaFPucchF3r10">deltaF0</p>
+        </item>
+      </list>
     </managedObject>
-    <managedObject class="NOKLTE:UFFIM" distName="MRBTS-4486/LNBTS-4486/LNCEL-1/UFFIM-1" version="xL24R3_2413_110" operation="create">
+    <managedObject class="NOKLTE:UFFIM" distName="MRBTS-4486/LNBTS-4486/LNCEL-103/UFFIM-1" version="xL24R3_2413_110" operation="create">
       <p name="tResUtra">4</p>
       <list name="utrFddCarFrqL">
         <item>
@@ -1438,4 +1439,49 @@
         </item>
       </list>
     </managedObject>
- 
+        <managedObject class="com.nokia.srbts.mnl:LCELL" distName="MRBTS-4486/MNL-1/MNLENT-1/CELLMAPPING-1/LCELL-2" version="MNL24R3_2413_120" operation="create">
+      <p name="actAsiDistMimo">false</p>
+      <p name="actDynamicSharedSpectrum">false</p>
+      <p name="actWcdmaLteSharedSpectrum">false</p>
+    </managedObject>
+    <managedObject class="com.nokia.srbts.mnl:CHANNELGROUP" distName="MRBTS-4486/MNL-1/MNLENT-1/CELLMAPPING-1/LCELL-2/CHANNELGROUP-1" version="MNL24R3_2413_120" operation="create"/>
+    <managedObject class="com.nokia.srbts.mnl:CHANNEL" distName="MRBTS-4486/MNL-1/MNLENT-1/CELLMAPPING-1/LCELL-2/CHANNELGROUP-1/CHANNEL-15" version="MNL24R3_2413_120" operation="create">
+      <p name="antlDN">MRBTS-4486/EQM-1/APEQM-1/RMOD-3/ANTL-4</p>
+      <p name="direction">TX</p>
+      <p name="iqStreamId">0</p>
+    </managedObject>
+    <managedObject class="com.nokia.srbts.mnl:CHANNEL" distName="MRBTS-4486/MNL-1/MNLENT-1/CELLMAPPING-1/LCELL-2/CHANNELGROUP-1/CHANNEL-16" version="MNL24R3_2413_120" operation="create">
+      <p name="antlDN">MRBTS-4486/EQM-1/APEQM-1/RMOD-3/ANTL-4</p>
+      <p name="direction">RX</p>
+      <p name="iqStreamId">0</p>
+    </managedObject>
+    <managedObject class="com.nokia.srbts.mnl:CHANNEL" distName="MRBTS-4486/MNL-1/MNLENT-1/CELLMAPPING-1/LCELL-2/CHANNELGROUP-1/CHANNEL-3" version="MNL24R3_2413_120" operation="create">
+      <p name="antlDN">MRBTS-4486/EQM-1/APEQM-1/RMOD-3/ANTL-1</p>
+      <p name="direction">TX</p>
+      <p name="iqStreamId">1</p>
+    </managedObject>
+    <managedObject class="com.nokia.srbts.mnl:CHANNEL" distName="MRBTS-4486/MNL-1/MNLENT-1/CELLMAPPING-1/LCELL-2/CHANNELGROUP-1/CHANNEL-4" version="MNL24R3_2413_120" operation="create">
+      <p name="antlDN">MRBTS-4486/EQM-1/APEQM-1/RMOD-3/ANTL-1</p>
+      <p name="direction">RX</p>
+      <p name="iqStreamId">1</p>
+    </managedObject>
+    <managedObject class="com.nokia.srbts.mnl:CHANNEL" distName="MRBTS-4486/MNL-1/MNLENT-1/CELLMAPPING-1/LCELL-2/CHANNELGROUP-1/CHANNEL-5" version="MNL24R3_2413_120" operation="create">
+      <p name="antlDN">MRBTS-4486/EQM-1/APEQM-1/RMOD-3/ANTL-2</p>
+      <p name="direction">TX</p>
+      <p name="iqStreamId">2</p>
+    </managedObject>
+    <managedObject class="com.nokia.srbts.mnl:CHANNEL" distName="MRBTS-4486/MNL-1/MNLENT-1/CELLMAPPING-1/LCELL-2/CHANNELGROUP-1/CHANNEL-6" version="MNL24R3_2413_120" operation="create">
+      <p name="antlDN">MRBTS-4486/EQM-1/APEQM-1/RMOD-3/ANTL-2</p>
+      <p name="direction">RX</p>
+      <p name="iqStreamId">2</p>
+    </managedObject>
+    <managedObject class="com.nokia.srbts.mnl:CHANNEL" distName="MRBTS-4486/MNL-1/MNLENT-1/CELLMAPPING-1/LCELL-2/CHANNELGROUP-1/CHANNEL-7" version="MNL24R3_2413_120" operation="create">
+      <p name="antlDN">MRBTS-4486/EQM-1/APEQM-1/RMOD-3/ANTL-3</p>
+      <p name="direction">TX</p>
+      <p name="iqStreamId">3</p>
+    </managedObject>
+    <managedObject class="com.nokia.srbts.mnl:CHANNEL" distName="MRBTS-4486/MNL-1/MNLENT-1/CELLMAPPING-1/LCELL-2/CHANNELGROUP-1/CHANNEL-8" version="MNL24R3_2413_120" operation="create">
+      <p name="antlDN">MRBTS-4486/EQM-1/APEQM-1/RMOD-3/ANTL-3</p>
+      <p name="direction">RX</p>
+      <p name="iqStreamId">3</p>
+    </managedObject>
